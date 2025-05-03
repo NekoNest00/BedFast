@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+        // BedFast custom colors
+        brand: {
+          red: "#FF385C",
+          teal: "#00A699",
+          dark: "#1A1F2C",
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +91,40 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+        'pulse-ring': {
+          '0%': { 
+            transform: 'scale(0.7)',
+            opacity: '1' 
+          },
+          '100%': { 
+            transform: 'scale(1.5)',
+            opacity: '0' 
+          }
+        },
+        'fade-in': {
+          '0%': { 
+            opacity: '0',
+            transform: 'translateY(10px)'
+          },
+          '100%': { 
+            opacity: '1',
+            transform: 'translateY(0)'
+          }
+        },
+        'unlock': {
+          '0%': { transform: 'rotate(0deg)' },
+          '20%': { transform: 'rotate(-20deg)' },
+          '40%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(0deg)' }
+        }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+        'pulse-ring': 'pulse-ring 1.5s cubic-bezier(0.24, 0, 0.38, 1) infinite',
+        'fade-in': 'fade-in 0.3s ease-out',
+        'unlock': 'unlock 1s ease-in-out'
 			}
 		}
 	},
