@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
 
+import EntrySequence from "./pages/EntrySequence";
 import Index from "./pages/Index";
 import PropertyDetails from "./pages/PropertyDetails";
 import Profile from "./pages/Profile";
@@ -24,6 +25,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              <Route path="/entry" element={<EntrySequence />} />
               <Route path="/" element={<Index />} />
               <Route path="/property/:id" element={<PropertyDetails />} />
               <Route path="/profile" element={<Profile />} />
