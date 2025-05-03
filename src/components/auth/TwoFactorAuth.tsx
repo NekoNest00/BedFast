@@ -75,8 +75,8 @@ const TwoFactorAuth = ({ email, onBack, onComplete }: TwoFactorAuthProps) => {
           maxLength={6}
           render={({ slots }) => (
             <InputOTPGroup>
-              {slots.map((slot, index) => (
-                <InputOTPSlot key={index} {...slot} />
+              {slots.map((slot, idx) => (
+                <InputOTPSlot key={slot.key} {...slot} index={idx} />
               ))}
             </InputOTPGroup>
           )}
