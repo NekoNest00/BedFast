@@ -35,7 +35,7 @@ export default function FilterBar({
         {/* Enhanced Filters Button */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="rounded-full h-8 text-xs hover:border-[#800020] hover:text-[#800020]">
+            <Button variant="outline" size="sm" className="rounded-full h-8 text-xs">
               <Filter size={14} className="mr-1" />
               Filters
             </Button>

@@ -68,8 +68,6 @@ export default {
           red: "#FF385C",
           teal: "#00A699",
           dark: "#1A1F2C",
-          burgundy: "#800020", // Added burgundy color
-          darkBlue: "#0A1929", // Added dark blue color
         }
 			},
 			borderRadius: {
