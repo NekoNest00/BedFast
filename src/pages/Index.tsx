@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Layout from "../components/Layout";
-import PropertyCard, { Property } from "../components/PropertyCard";
+import { Property } from "../components/PropertyCard";
 import { useTheme } from "../context/ThemeContext";
-import ThemeToggle from "../components/ThemeToggle";
-import { Map, List, Filter } from "lucide-react";
-import PropertyMap from "../components/PropertyMap";
-import PropertyFilter, { FilterOptions, SortButton } from "../components/PropertyFilter";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import RecommendationButton from "../components/recommendations/RecommendationButton";
+import { FilterOptions } from "../components/PropertyFilter";
 import { useRecommendations } from "../hooks/useRecommendations";
+
+// Import our new components
+import HomeHeader from "../components/home/HomeHeader";
+import ViewToggle from "../components/home/ViewToggle";
+import FilterBar from "../components/home/FilterBar";
+import PropertiesMapView from "../components/home/PropertiesMapView";
+import PropertiesListView from "../components/home/PropertiesListView";
+import RecommendationsView from "../components/home/RecommendationsView";
 
 export default function Index() {
   const { theme } = useTheme();
@@ -142,114 +143,54 @@ export default function Index() {
     setShowRecommended(!showRecommended);
   };
 
+  const clearFilters = () => {
+    setFilters({
+      priceRange: [0, 500],
+      propertyTypes: [],
+      instant: false
+    });
+  };
+
   const recommendedPropertySet = recommendations.find(rec => rec.type === 'personalized');
 
   return (
     <Layout>
       <div className="container-app">
         {/* Header */}
-        <div className="flex items-center justify-between py-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">BedFast</h1>
-            <p className="text-sm text-muted-foreground">Find and access homes instantly</p>
-          </div>
-          <ThemeToggle />
-        </div>
+        <HomeHeader />
 
         {/* View toggle */}
-        <div className="mb-4 flex justify-center">
-          <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "map" | "list")}>
-            <ToggleGroupItem value="map" aria-label="Map View">
-              <Map className="mr-2" size={16} />
-              Map
-            </ToggleGroupItem>
-            <ToggleGroupItem value="list" aria-label="List View">
-              <List className="mr-2" size={16} />
-              List
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
+        <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
 
         {/* Filters and For You button */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-none">
-            {/* AI Recommendation Button */}
-            <RecommendationButton 
-              onClick={toggleRecommended} 
-              active={showRecommended} 
-            />
-            
-            {/* Enhanced Filters Button */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-full">
-                  <Filter size={18} className="mr-2" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[85vh]">
-                <PropertyFilter 
-                  filters={filters} 
-                  onFilterChange={setFilters} 
-                  maxPrice={500}
-                />
-              </SheetContent>
-            </Sheet>
-            
-            {/* Sort Button */}
-            <SortButton 
-              currentSort={sortOption} 
-              onSortChange={setSortOption} 
-            />
-          </div>
-        </div>
+        <FilterBar 
+          filters={filters}
+          showRecommended={showRecommended}
+          sortOption={sortOption}
+          onFilterChange={setFilters}
+          onRecommendedToggle={toggleRecommended}
+          onSortChange={setSortOption}
+        />
 
         {/* Map View */}
         {viewMode === "map" && !showRecommended && (
-          <div className="h-[calc(100vh-240px)] mb-6">
-            <PropertyMap 
-              properties={filteredProperties} 
-              mapboxToken={mapboxToken} 
-            />
-          </div>
+          <PropertiesMapView 
+            properties={filteredProperties}
+            mapboxToken={mapboxToken}
+          />
         )}
 
-        {/* AI Recommendations View - Just displaying as a list now */}
-        {showRecommended && recommendedPropertySet && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">{recommendedPropertySet.title}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{recommendedPropertySet.description}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-              {recommendedPropertySet.properties.map(property => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          </div>
+        {/* AI Recommendations View */}
+        {showRecommended && (
+          <RecommendationsView recommendationSet={recommendedPropertySet} />
         )}
 
         {/* List View */}
         {viewMode === "list" && !showRecommended && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8">
-            {filteredProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-            
-            {filteredProperties.length === 0 && (
-              <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-muted-foreground mb-2">No properties match your current filters</p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setFilters({
-                    priceRange: [0, 500],
-                    propertyTypes: [],
-                    instant: false
-                  })}
-                >
-                  Clear All Filters
-                </Button>
-              </div>
-            )}
-          </div>
+          <PropertiesListView 
+            properties={filteredProperties}
+            onClearFilters={clearFilters}
+          />
         )}
       </div>
     </Layout>
