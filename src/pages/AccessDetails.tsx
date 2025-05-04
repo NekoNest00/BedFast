@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -9,6 +8,7 @@ import { Copy, Users, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import GuestAccessForm from "../components/access/GuestAccessForm";
 import { format, isBefore, isAfter } from "date-fns";
+import ViewingScheduler from "../components/viewings/ViewingScheduler";
 
 export default function AccessDetails() {
   const { id } = useParams<{ id: string }>();
