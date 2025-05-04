@@ -14,11 +14,36 @@ import {
   Bath,
   Home,
   CalendarDays,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { 
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Alert,
+  AlertDescription,
+} from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
   const [isBooked, setIsBooked] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const { toast } = useToast();
   
   // Mock property details data
   const property = {
@@ -32,52 +57,131 @@ export default function PropertyDetails() {
     images: [
       "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1502005097973-6a7082348e28?ixlib=rb-4.0.3",
-      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?ixlib=rb-4.0.3"
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1586105251261-72a756497a11?ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1645875061218-f870243fee9e?ixlib=rb-4.0.3",
     ],
     amenities: ["Wifi", "TV", "Kitchen", "Air conditioning", "Washer", "Dryer"],
     bedrooms: 2,
     bathrooms: 1,
     maxGuests: 4,
     instant: true,
+    checkIn: "3:00 PM",
+    checkOut: "11:00 AM",
+    accessType: "PIN-based",
+    hostName: "Sarah",
+    hostImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3",
   };
+
+  // Mock related properties
+  const relatedProperties = [
+    {
+      id: "prop2",
+      name: "Luxury Loft with City View",
+      price: 189,
+      image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3",
+      rating: 4.85,
+      instant: true,
+    },
+    {
+      id: "prop3",
+      name: "Cozy Studio in Downtown",
+      price: 120,
+      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3",
+      rating: 4.76,
+      instant: false,
+    },
+    {
+      id: "prop4",
+      name: "Modern Apartment with View",
+      price: 160,
+      image: "https://images.unsplash.com/photo-1554995207-c18c203602cb?ixlib=rb-4.0.3",
+      rating: 4.89,
+      instant: true,
+    },
+  ];
 
   // Mock booking function
   const handleBooking = () => {
     // In a real app, this would call the booking API
+    toast({
+      title: "Booking initiated",
+      description: "Processing your reservation...",
+    });
+    
     setTimeout(() => {
       setIsBooked(true);
-    }, 1000);
+    }, 1500);
+  };
+
+  const handleScheduleViewing = () => {
+    toast({
+      title: "Viewing Scheduled",
+      description: "Check your email for confirmation details.",
+    });
+  };
+
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite);
+    toast({
+      title: isFavorite ? "Removed from favorites" : "Added to favorites",
+      description: isFavorite ? "Property removed from your saved list" : "Property added to your saved list",
+    });
+  };
+
+  const handleShare = () => {
+    // In a real app, this would open a share dialog
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Link copied",
+      description: "Property link copied to clipboard",
+    });
   };
 
   return (
     <Layout>
-      <div className="relative">
-        {/* Property Images */}
-        <div className="relative h-72 overflow-hidden">
-          <img 
-            src={property.images[0]} 
-            alt={property.name}
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
-            <Link 
+      <div className="relative pb-16">
+        {/* Property Images Carousel */}
+        <div className="relative mb-4">
+          <Carousel className="w-full">
+            <CarouselContent>
+              {property.images.map((image, index) => (
+                <CarouselItem key={index}>
+                  <AspectRatio ratio={16 / 9} className="bg-muted">
+                    <img
+                      src={image}
+                      alt={`${property.name} - photo ${index + 1}`}
+                      className="h-full w-full object-cover rounded-lg"
+                    />
+                  </AspectRatio>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-2 bg-background/80" />
+            <CarouselNext className="right-2 bg-background/80" />
+          </Carousel>
+
+          <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
+            <Link
               to="/"
-              className="w-10 h-10 rounded-full flex items-center justify-center bg-white/90 dark:bg-black/60"
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
             >
               <ArrowLeft size={20} className="text-foreground" />
             </Link>
             <div className="flex gap-2">
-              <button 
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/90 dark:bg-black/60"
+              <button
+                onClick={handleShare}
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
                 aria-label="Share"
               >
                 <Share size={20} className="text-foreground" />
               </button>
-              <button 
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/90 dark:bg-black/60"
+              <button
+                onClick={toggleFavorite}
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
                 aria-label="Save to favorites"
               >
-                <Heart size={20} className="text-foreground" />
+                <Heart size={20} className={isFavorite ? "text-red-500 fill-red-500" : "text-foreground"} />
               </button>
             </div>
           </div>
@@ -85,11 +189,11 @@ export default function PropertyDetails() {
 
         {/* Property Details */}
         <div className="container-app">
-          <div className="py-4">
-            <h1 className="text-xl font-bold">{property.name}</h1>
-            <div className="flex items-center gap-2 mt-1 text-sm">
+          <div className="py-2">
+            <h1 className="text-xl font-bold mb-1">{property.name}</h1>
+            <div className="flex items-center gap-2 text-sm">
               <div className="flex items-center">
-                <Star size={16} className="text-brand-red mr-1" />
+                <Star size={16} className="text-amber-500 mr-1" />
                 <span>{property.rating}</span>
                 <span className="mx-1">·</span>
                 <span className="underline">{property.reviews} reviews</span>
@@ -101,27 +205,74 @@ export default function PropertyDetails() {
               </div>
             </div>
 
+            {/* Host info */}
+            <div className="flex items-center mt-3">
+              <Avatar className="h-8 w-8 mr-2 border-2 border-background">
+                <AvatarImage src={property.hostImage} alt={property.hostName} />
+                <AvatarFallback>{property.hostName.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm">Hosted by {property.hostName}</span>
+            </div>
+
+            {/* Access Type Badge */}
+            <div className="mt-3">
+              <Badge variant="outline" className="bg-muted/50">
+                {property.accessType} Access
+              </Badge>
+            </div>
+
+            {/* Availability Info */}
+            <div className="mt-4 flex gap-3 text-sm text-muted-foreground">
+              <div className="flex items-center">
+                <Calendar size={15} className="mr-1" />
+                <span>Check-in: {property.checkIn}</span>
+              </div>
+              <div className="flex items-center">
+                <Calendar size={15} className="mr-1" />
+                <span>Check-out: {property.checkOut}</span>
+              </div>
+            </div>
+
             {/* Price and Booking */}
-            <div className="mt-4 p-4 border rounded-xl">
-              <div className="flex justify-between items-center">
+            <div className="mt-4 p-4 border rounded-xl bg-card">
+              <div className="flex justify-between items-center mb-3">
                 <div>
                   <span className="text-xl font-semibold">${property.price}</span>
                   <span className="text-muted-foreground"> night</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-sm">{property.bedrooms} beds</span>
-                  <span>·</span>
-                  <span className="text-sm">{property.bathrooms} bath</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm flex items-center">
+                    <Star size={14} className="text-amber-500 mr-1" />
+                    {property.rating}
+                  </span>
+                  <span className="text-sm flex items-center gap-1">
+                    <Home size={14} />
+                    {property.bedrooms}
+                  </span>
+                  <span className="text-sm flex items-center gap-1">
+                    <Bath size={14} />
+                    {property.bathrooms}
+                  </span>
                 </div>
               </div>
               
               {!isBooked ? (
-                <button 
-                  onClick={handleBooking} 
-                  className="btn-primary w-full mt-4"
-                >
-                  Book Instantly
-                </button>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={handleBooking} 
+                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md"
+                  >
+                    Book Now
+                  </Button>
+                  <Button 
+                    onClick={handleScheduleViewing} 
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <CalendarDays size={16} className="mr-2" />
+                    Schedule a Viewing
+                  </Button>
+                </div>
               ) : (
                 <SmartLockInterface 
                   propertyId={property.id} 
@@ -161,14 +312,50 @@ export default function PropertyDetails() {
               </div>
             </div>
 
-            {/* Calendar Availability */}
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-3">Availability</h2>
-              <div className="border rounded-xl p-4 flex justify-center items-center h-40">
-                <div className="flex flex-col items-center text-muted-foreground">
-                  <CalendarDays size={24} />
-                  <p className="mt-2 text-sm">Check the calendar for available dates</p>
-                  <button className="mt-2 btn-outline text-xs py-2">View Calendar</button>
+            {/* AI-powered Related Properties */}
+            <div className="mt-8">
+              <h2 className="text-lg font-semibold mb-3">AI-Powered Suggestions</h2>
+              <Alert className="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-indigo-100 dark:from-indigo-950/30 dark:to-purple-950/30 dark:border-indigo-900/50">
+                <AlertDescription className="text-sm">
+                  Based on your preferences, we think you'll also love these properties.
+                </AlertDescription>
+              </Alert>
+              
+              <div className="overflow-x-auto pb-2 -mx-4 px-4">
+                <div className="flex gap-4">
+                  {relatedProperties.map((relatedProp) => (
+                    <Card key={relatedProp.id} className="min-w-[240px] max-w-[240px]">
+                      <Link to={`/property/${relatedProp.id}`}>
+                        <AspectRatio ratio={4/3} className="bg-muted">
+                          <img
+                            src={relatedProp.image}
+                            alt={relatedProp.name}
+                            className="h-full w-full object-cover rounded-t-lg"
+                          />
+                        </AspectRatio>
+                        <CardContent className="p-3">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h3 className="font-medium text-sm truncate">{relatedProp.name}</h3>
+                              <div className="flex items-center gap-1 mt-1">
+                                <span className="text-sm font-semibold">${relatedProp.price}</span>
+                                <span className="text-xs text-muted-foreground">night</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center">
+                              <Star size={14} className="text-amber-500" />
+                              <span className="text-xs ml-1">{relatedProp.rating}</span>
+                            </div>
+                          </div>
+                          {relatedProp.instant && (
+                            <Badge variant="outline" className="mt-2 text-xs bg-brand-red/10 text-brand-red border-brand-red/20">
+                              Instant Access
+                            </Badge>
+                          )}
+                        </CardContent>
+                      </Link>
+                    </Card>
+                  ))}
                 </div>
               </div>
             </div>
