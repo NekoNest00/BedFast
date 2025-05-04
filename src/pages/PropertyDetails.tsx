@@ -1,17 +1,16 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import BookingForm from "../components/BookingForm";
 import BookingConfirmation from "../components/BookingConfirmation";
-import { Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// New component imports
+// Component imports
 import PropertyImageCarousel from "../components/property/PropertyImageCarousel";
 import PropertyDetailsHeader from "../components/property/PropertyDetailsHeader";
 import PropertyDescription from "../components/property/PropertyDescription";
-import RelatedProperties from "../components/property/RelatedProperties";
+import RecommendationCarousel from "../components/recommendations/RecommendationCarousel";
+import { useRecommendations } from "@/hooks/useRecommendations";
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +19,13 @@ export default function PropertyDetails() {
   const [generatedPin, setGeneratedPin] = useState("");
   const [bookingDates, setBookingDates] = useState<{start?: Date, end?: Date}>({});
   const { toast } = useToast();
+  
+  // Fetch AI recommendations based on the current property
+  const { 
+    similarProperties, 
+    nearbyProperties,
+    loading: loadingRecommendations 
+  } = useRecommendations(id);
   
   // Mock property details data
   const property = {
@@ -155,8 +161,28 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          {/* Related Properties */}
-          <RelatedProperties properties={relatedProperties} />
+          {/* AI-powered recommendations */}
+          {!loadingRecommendations && (
+            <>
+              {similarProperties.length > 0 && (
+                <RecommendationCarousel 
+                  title="Similar Places You May Like" 
+                  description="Based on your preferences and this property's features"
+                  properties={similarProperties} 
+                  className="mt-8" 
+                />
+              )}
+              
+              {nearbyProperties.length > 0 && (
+                <RecommendationCarousel 
+                  title="Explore Nearby" 
+                  description="Other options in this area"
+                  properties={nearbyProperties} 
+                  className="mt-8" 
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
     </Layout>
