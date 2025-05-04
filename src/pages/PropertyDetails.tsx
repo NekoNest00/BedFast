@@ -11,7 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import PropertyImageCarousel from "../components/property/PropertyImageCarousel";
 import PropertyDetailsHeader from "../components/property/PropertyDetailsHeader";
 import PropertyDescription from "../components/property/PropertyDescription";
-import RelatedProperties from "../components/property/RelatedProperties";
+import RecommendationCarousel from "../components/recommendations/RecommendationCarousel";
+import { useRecommendations } from "../hooks/useRecommendations";
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,9 @@ export default function PropertyDetails() {
   const [generatedPin, setGeneratedPin] = useState("");
   const [bookingDates, setBookingDates] = useState<{start?: Date, end?: Date}>({});
   const { toast } = useToast();
+  
+  // Fetch recommendations based on property ID
+  const { recommendations, isLoading } = useRecommendations(id);
   
   // Mock property details data
   const property = {
@@ -48,34 +52,6 @@ export default function PropertyDetails() {
     hostName: "Sarah",
     hostImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3",
   };
-
-  // Mock related properties
-  const relatedProperties = [
-    {
-      id: "prop2",
-      name: "Luxury Loft with City View",
-      price: 189,
-      image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3",
-      rating: 4.85,
-      instant: true,
-    },
-    {
-      id: "prop3",
-      name: "Cozy Studio in Downtown",
-      price: 120,
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3",
-      rating: 4.76,
-      instant: false,
-    },
-    {
-      id: "prop4",
-      name: "Modern Apartment with View",
-      price: 160,
-      image: "https://images.unsplash.com/photo-1554995207-c18c203602cb?ixlib=rb-4.0.3",
-      rating: 4.89,
-      instant: true,
-    },
-  ];
 
   // Mock booking function
   const handleBookingComplete = (pin: string) => {
@@ -155,8 +131,12 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          {/* Related Properties */}
-          <RelatedProperties properties={relatedProperties} />
+          {/* AI-Powered Recommendations */}
+          {!isLoading && recommendations.length > 0 && (
+            <RecommendationCarousel 
+              recommendations={recommendations.find(rec => rec.type === 'similar') || recommendations[0]} 
+            />
+          )}
         </div>
       </div>
     </Layout>

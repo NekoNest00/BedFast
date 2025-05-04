@@ -10,18 +10,25 @@ import PropertyFilter, { FilterOptions, FilterButton, SortButton } from "../comp
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import RecommendationButton from "../components/recommendations/RecommendationButton";
+import RecommendationCarousel from "../components/recommendations/RecommendationCarousel";
+import { useRecommendations } from "../hooks/useRecommendations";
 
 export default function Index() {
   const { theme } = useTheme();
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOption, setSortOption] = useState("Top Rated");
+  const [showRecommended, setShowRecommended] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     priceRange: [0, 500],
     propertyTypes: [],
     instant: false
   });
   const [mapboxToken, setMapboxToken] = useState<string>("");
+  
+  // Fetch AI recommendations
+  const { recommendations, isLoading } = useRecommendations();
   
   // Mock property data
   const [properties, setProperties] = useState<Property[]>([
@@ -81,11 +88,16 @@ export default function Index() {
     },
   ]);
 
-  // Categories for filtering
-  const categories = ["All", "Instant", "Urban", "Beach", "Mountain", "Lake"];
+  // Streamlined categories with recommendation button
+  const categories = ["All", "Instant", "Beach", "Mountain"];
 
   // Filter and sort properties
   const filteredProperties = properties.filter(property => {
+    // If showing recommendations, skip regular filtering
+    if (showRecommended) {
+      return false;
+    }
+    
     // Category filter
     if (selectedCategory !== "All") {
       if (selectedCategory === "Instant" && !property.instant) {
@@ -96,9 +108,6 @@ export default function Index() {
         return false;
       }
       if (selectedCategory === "Mountain" && !property.location.includes("Aspen")) {
-        return false;
-      }
-      if (selectedCategory === "Urban" && !property.location.includes("Downtown")) {
         return false;
       }
     }
@@ -149,6 +158,15 @@ export default function Index() {
     }
   });
 
+  const toggleRecommended = () => {
+    setShowRecommended(!showRecommended);
+    if (!showRecommended) {
+      setSelectedCategory("All");
+    }
+  };
+
+  const recommendedPropertySet = recommendations.find(rec => rec.type === 'personalized');
+
   return (
     <Layout>
       <div className="container-app">
@@ -178,7 +196,14 @@ export default function Index() {
         {/* Filters and Categories */}
         <div className="mb-6">
           <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-none">
-            {categories.map((category) => (
+            {/* AI Recommendation Button */}
+            <RecommendationButton 
+              onClick={toggleRecommended} 
+              active={showRecommended} 
+            />
+            
+            {/* Streamlined Categories */}
+            {!showRecommended && categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
@@ -216,7 +241,7 @@ export default function Index() {
         </div>
 
         {/* Map View */}
-        {viewMode === "map" && (
+        {viewMode === "map" && !showRecommended && (
           <div className="h-[calc(100vh-240px)] mb-6">
             <PropertyMap 
               properties={filteredProperties} 
@@ -225,8 +250,29 @@ export default function Index() {
           </div>
         )}
 
+        {/* AI Recommendations View */}
+        {showRecommended && recommendedPropertySet && (
+          <div className="mb-8">
+            <RecommendationCarousel 
+              recommendations={recommendedPropertySet} 
+              className="mb-8"
+            />
+            
+            {recommendations
+              .filter(rec => rec.type !== 'personalized')
+              .map(recSet => (
+                <RecommendationCarousel 
+                  key={recSet.type}
+                  recommendations={recSet}
+                  className="mb-8"
+                />
+              ))
+            }
+          </div>
+        )}
+
         {/* List View */}
-        {viewMode === "list" && (
+        {viewMode === "list" && !showRecommended && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8">
             {filteredProperties.map((property) => (
               <PropertyCard key={property.id} property={property} />
@@ -250,27 +296,8 @@ export default function Index() {
           </div>
         )}
 
-        {/* Featured Properties (list view only) */}
-        {viewMode === "list" && filteredProperties.length > 0 && (
-          <section className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Featured Stays</h2>
-              <button className="flex items-center text-sm text-muted-foreground">
-                View all <ChevronRight size={16} />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-              {filteredProperties
-                .slice(0, 3)
-                .map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
-            </div>
-          </section>
-        )}
-
         {/* Instant access collection (list view only) */}
-        {viewMode === "list" && filteredProperties.some(p => p.instant) && (
+        {viewMode === "list" && !showRecommended && filteredProperties.some(p => p.instant) && (
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Instant Access</h2>
