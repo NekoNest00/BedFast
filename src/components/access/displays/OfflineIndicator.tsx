@@ -12,20 +12,20 @@ export default function OfflineIndicator({ isOffline, lastSyncTime }: OfflineInd
   if (!isOffline) return null;
   
   return (
-    <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md p-3 space-y-2">
+    <div className="bg-brand-red/5 dark:bg-brand-red/10 border border-brand-red/20 dark:border-brand-red/30 rounded-md p-3 space-y-2">
       <div className="flex items-center gap-2">
-        <WifiOff size={16} className="text-amber-600 dark:text-amber-400" />
-        <p className="text-sm text-amber-700 dark:text-amber-300">Offline Mode – PIN retrieved securely</p>
+        <WifiOff size={16} className="text-brand-red" />
+        <p className="text-sm text-brand-red">Offline Mode – PIN retrieved securely</p>
       </div>
       
       {lastSyncTime && (
-        <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-500">
+        <div className="flex items-center gap-2 text-xs text-brand-red/80">
           <Clock size={14} />
           <span>Last synced: {format(lastSyncTime, "MMM d, h:mm a")}</span>
         </div>
       )}
       
-      <p className="text-xs text-amber-600 dark:text-amber-500">
+      <p className="text-xs text-brand-red/80">
         Reconnect to get updated access information. Your cached PIN will work if still within your access window.
       </p>
     </div>

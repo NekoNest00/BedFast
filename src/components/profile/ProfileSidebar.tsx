@@ -93,11 +93,14 @@ export default function ProfileSidebar({
                     <div className="flex items-center gap-3">
                       <item.icon
                         size={18}
-                        className="text-muted-foreground"
+                        className="text-brand-red"
                       />
                       <span>{item.label}</span>
                     </div>
-                    <Switch checked={item.isActive} />
+                    <Switch 
+                      checked={item.isActive} 
+                      className="data-[state=checked]:bg-brand-red"
+                    />
                   </button>
                 ) : item.onClick ? (
                   <button
@@ -107,7 +110,7 @@ export default function ProfileSidebar({
                     <div className="flex items-center gap-3">
                       <item.icon
                         size={18}
-                        className="text-muted-foreground"
+                        className="text-brand-red"
                       />
                       <span>{item.label}</span>
                     </div>
@@ -121,7 +124,7 @@ export default function ProfileSidebar({
                     <div className="flex items-center gap-3">
                       <item.icon
                         size={18}
-                        className="text-muted-foreground"
+                        className="text-brand-red"
                       />
                       <span>{item.label}</span>
                     </div>

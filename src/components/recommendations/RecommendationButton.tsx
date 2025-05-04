@@ -15,7 +15,7 @@ const RecommendationButton = ({ onClick, active }: RecommendationButtonProps) =>
       variant={active ? "default" : "outline"}
       className={`rounded-full text-xs h-8 ${
         active
-          ? "bg-gradient-to-r from-brand-red to-[#ff6b4a] text-white border-none"
+          ? "bg-brand-red text-white border-none hover:bg-brand-red/90"
           : ""
       }`}
     >

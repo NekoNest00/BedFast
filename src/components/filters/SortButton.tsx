@@ -21,7 +21,7 @@ export function SortButton({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="category-pill bg-muted text-muted-foreground whitespace-nowrap">
+        <button className="category-pill bg-muted text-brand-red whitespace-nowrap">
           <span>Sort: {currentSort}</span>
           <ChevronDown size={14} />
         </button>
@@ -32,7 +32,7 @@ export function SortButton({
             <button
               key={option}
               className={`p-2 text-sm text-left rounded-md hover:bg-muted ${
-                currentSort === option ? "bg-muted font-medium" : ""
+                currentSort === option ? "bg-muted text-brand-red font-medium" : ""
               }`}
               onClick={() => onSortChange(option)}
             >

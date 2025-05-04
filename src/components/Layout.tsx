@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center justify-around py-3">
             <Link 
               to="/" 
-              className={`bottom-nav-item ${isActive("/") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/") ? "text-brand-red" : "text-muted-foreground"}`}
             >
               {isActive("/") ? (
                 <motion.div 
@@ -49,7 +49,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link 
               to="/bookings" 
-              className={`bottom-nav-item ${isActive("/bookings") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/bookings") ? "text-brand-red" : "text-muted-foreground"}`}
             >
               {isActive("/bookings") ? (
                 <motion.div 
@@ -70,7 +70,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link 
               to="/access" 
-              className={`bottom-nav-item ${isActive("/access") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/access") ? "text-brand-red" : "text-muted-foreground"}`}
             >
               {isActive("/access") ? (
                 <motion.div 
@@ -91,7 +91,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link 
               to="/viewings" 
-              className={`bottom-nav-item ${isActive("/viewings") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/viewings") ? "text-brand-red" : "text-muted-foreground"}`}
             >
               {isActive("/viewings") ? (
                 <motion.div 
@@ -112,7 +112,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link 
               to="/profile" 
-              className={`bottom-nav-item ${isActive("/profile") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/profile") ? "text-brand-red" : "text-muted-foreground"}`}
             >
               {isActive("/profile") ? (
                 <motion.div 
