@@ -1,8 +1,9 @@
-
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import SmartLockInterface from "../components/SmartLockInterface";
+import BookingForm from "../components/BookingForm";
+import BookingConfirmation from "../components/BookingConfirmation";
 import { 
   ArrowLeft, 
   Heart, 
@@ -41,8 +42,10 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
-  const [isBooked, setIsBooked] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [bookingComplete, setBookingComplete] = useState(false);
+  const [generatedPin, setGeneratedPin] = useState("");
+  const [bookingDates, setBookingDates] = useState<{start?: Date, end?: Date}>({});
   const { toast } = useToast();
   
   // Mock property details data
@@ -58,7 +61,7 @@ export default function PropertyDetails() {
       "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1502005097973-6a7082348e28?ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?ixlib=rb-4.0.3",
-      "https://images.unsplash.com/photo-1586105251261-72a756497a11?ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1586105251218-f870243fee9e?ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1645875061218-f870243fee9e?ixlib=rb-4.0.3",
     ],
     amenities: ["Wifi", "TV", "Kitchen", "Air conditioning", "Washer", "Dryer"],
@@ -102,22 +105,12 @@ export default function PropertyDetails() {
   ];
 
   // Mock booking function
-  const handleBooking = () => {
-    // In a real app, this would call the booking API
+  const handleBookingComplete = (pin: string) => {
+    setGeneratedPin(pin);
+    setBookingComplete(true);
     toast({
-      title: "Booking initiated",
-      description: "Processing your reservation...",
-    });
-    
-    setTimeout(() => {
-      setIsBooked(true);
-    }, 1500);
-  };
-
-  const handleScheduleViewing = () => {
-    toast({
-      title: "Viewing Scheduled",
-      description: "Check your email for confirmation details.",
+      title: "Booking Successful!",
+      description: "Your booking has been confirmed and a PIN has been generated.",
     });
   };
 
@@ -135,6 +128,13 @@ export default function PropertyDetails() {
     toast({
       title: "Link copied",
       description: "Property link copied to clipboard",
+    });
+  };
+
+  const handleScheduleViewing = () => {
+    toast({
+      title: "Viewing Scheduled",
+      description: "Check your email for confirmation details.",
     });
   };
 
@@ -234,80 +234,59 @@ export default function PropertyDetails() {
             </div>
 
             {/* Price and Booking */}
-            <div className="mt-4 p-4 border rounded-xl bg-card">
-              <div className="flex justify-between items-center mb-3">
-                <div>
-                  <span className="text-xl font-semibold">${property.price}</span>
-                  <span className="text-muted-foreground"> night</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm flex items-center">
-                    <Star size={14} className="text-amber-500 mr-1" />
-                    {property.rating}
-                  </span>
-                  <span className="text-sm flex items-center gap-1">
-                    <Home size={14} />
-                    {property.bedrooms}
-                  </span>
-                  <span className="text-sm flex items-center gap-1">
-                    <Bath size={14} />
-                    {property.bathrooms}
-                  </span>
-                </div>
-              </div>
-              
-              {!isBooked ? (
-                <div className="space-y-3">
-                  <Button 
-                    onClick={handleBooking} 
-                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md"
-                  >
-                    Book Now
-                  </Button>
-                  <Button 
-                    onClick={handleScheduleViewing} 
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <CalendarDays size={16} className="mr-2" />
-                    Schedule a Viewing
-                  </Button>
-                </div>
-              ) : (
-                <SmartLockInterface 
-                  propertyId={property.id} 
-                  propertyName={property.name} 
-                />
-              )}
-            </div>
+            <div className="mt-4">
+              <div className="lg:grid lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  {/* Property Description */}
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold mb-2">About this place</h2>
+                    <p className="text-muted-foreground text-sm">
+                      {property.description}
+                    </p>
+                  </div>
 
-            {/* Property Description */}
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-2">About this place</h2>
-              <p className="text-muted-foreground text-sm">
-                {property.description}
-              </p>
-            </div>
-
-            {/* Property Amenities */}
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-3">Amenities</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <Wifi size={20} className="text-muted-foreground" />
-                  <span>Wifi</span>
+                  {/* Property Amenities */}
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold mb-3">Amenities</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-3">
+                        <Wifi size={20} className="text-muted-foreground" />
+                        <span>Wifi</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Tv size={20} className="text-muted-foreground" />
+                        <span>TV</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Bath size={20} className="text-muted-foreground" />
+                        <span>Bath</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Home size={20} className="text-muted-foreground" />
+                        <span>Kitchen</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Tv size={20} className="text-muted-foreground" />
-                  <span>TV</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Bath size={20} className="text-muted-foreground" />
-                  <span>Bath</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Home size={20} className="text-muted-foreground" />
-                  <span>Kitchen</span>
+                
+                <div className="mt-6 lg:mt-0">
+                  {bookingComplete ? (
+                    <BookingConfirmation 
+                      pin={generatedPin}
+                      propertyName={property.name}
+                      startDate={bookingDates.start}
+                      endDate={bookingDates.end}
+                    />
+                  ) : (
+                    <BookingForm
+                      propertyId={property.id}
+                      propertyName={property.name}
+                      pricePerNight={property.price}
+                      onBookingComplete={(pin) => {
+                        handleBookingComplete(pin);
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             </div>
