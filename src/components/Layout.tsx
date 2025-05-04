@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center justify-around py-3">
             <Link 
               to="/" 
-              className={`bottom-nav-item ${isActive("/") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/") ? "text-[#800020] font-medium" : "text-muted-foreground"}`}
             >
               {isActive("/") ? (
                 <motion.div 
@@ -36,7 +36,7 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <Home size={22} />
+                  <Home size={22} className="text-[#800020]" />
                   <span>Home</span>
                 </motion.div>
               ) : (
@@ -49,7 +49,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link 
               to="/bookings" 
-              className={`bottom-nav-item ${isActive("/bookings") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/bookings") ? "text-[#800020] font-medium" : "text-muted-foreground"}`}
             >
               {isActive("/bookings") ? (
                 <motion.div 
@@ -57,7 +57,7 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <CalendarDays size={22} />
+                  <CalendarDays size={22} className="text-[#800020]" />
                   <span>Bookings</span>
                 </motion.div>
               ) : (
@@ -70,7 +70,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link 
               to="/access" 
-              className={`bottom-nav-item ${isActive("/access") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/access") ? "text-[#800020] font-medium" : "text-muted-foreground"}`}
             >
               {isActive("/access") ? (
                 <motion.div 
@@ -78,7 +78,7 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <Key size={22} />
+                  <Key size={22} className="text-[#800020]" />
                   <span>Access</span>
                 </motion.div>
               ) : (
@@ -91,7 +91,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link 
               to="/viewings" 
-              className={`bottom-nav-item ${isActive("/viewings") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/viewings") ? "text-[#800020] font-medium" : "text-muted-foreground"}`}
             >
               {isActive("/viewings") ? (
                 <motion.div 
@@ -99,7 +99,7 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <Eye size={22} />
+                  <Eye size={22} className="text-[#800020]" />
                   <span>Viewings</span>
                 </motion.div>
               ) : (
@@ -112,7 +112,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <Link 
               to="/profile" 
-              className={`bottom-nav-item ${isActive("/profile") ? "text-primary" : "text-muted-foreground"}`}
+              className={`bottom-nav-item ${isActive("/profile") ? "text-[#800020] font-medium" : "text-muted-foreground"}`}
             >
               {isActive("/profile") ? (
                 <motion.div 
@@ -120,7 +120,7 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <User size={22} />
+                  <User size={22} className="text-[#800020]" />
                   <span>Profile</span>
                 </motion.div>
               ) : (

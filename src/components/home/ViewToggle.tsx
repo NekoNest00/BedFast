@@ -21,11 +21,19 @@ export default function ViewToggle({ viewMode, onViewModeChange }: ViewTogglePro
           onValueChange={(value) => value && onViewModeChange(value as "map" | "list")}
           className="bg-muted/80 rounded-full p-1"
         >
-          <ToggleGroupItem value="map" aria-label="Map View" className="rounded-full text-xs py-1 px-3">
+          <ToggleGroupItem 
+            value="map" 
+            aria-label="Map View" 
+            className="rounded-full text-xs py-1 px-3 data-[state=on]:bg-[#800020] data-[state=on]:text-white"
+          >
             <Map className="mr-1" size={14} />
             Map
           </ToggleGroupItem>
-          <ToggleGroupItem value="list" aria-label="List View" className="rounded-full text-xs py-1 px-3">
+          <ToggleGroupItem 
+            value="list" 
+            aria-label="List View" 
+            className="rounded-full text-xs py-1 px-3 data-[state=on]:bg-[#800020] data-[state=on]:text-white"
+          >
             <List className="mr-1" size={14} />
             List
           </ToggleGroupItem>
@@ -34,7 +42,7 @@ export default function ViewToggle({ viewMode, onViewModeChange }: ViewTogglePro
         <Input
           type="text"
           placeholder="Search properties..."
-          className="w-full max-w-xs h-8 text-xs rounded-full border-muted-foreground/20"
+          className="w-full max-w-xs h-8 text-xs rounded-full border-muted-foreground/20 focus-visible:ring-[#800020]"
           onClick={() => setShowSearchBar(true)}
         />
       </div>

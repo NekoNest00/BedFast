@@ -23,8 +23,8 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
  
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 345 80% 25%; /* Burgundy accent */
+    --accent-foreground: 210 40% 98%;
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -37,13 +37,14 @@
 
     --brand-red: 350 89% 60%;
     --brand-teal: 171 68% 41%;
+    --brand-burgundy: 345 80% 25%; /* Burgundy color */
   }
  
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 11%; /* Dark blue background */
     --foreground: 210 40% 98%;
  
-    --card: 222.2 84% 4.9%;
+    --card: 224 71% 4%;
     --card-foreground: 210 40% 98%;
  
     --popover: 222.2 84% 4.9%;
@@ -58,7 +59,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
  
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 345 80% 25%; /* Burgundy accent */
     --accent-foreground: 210 40% 98%;
  
     --destructive: 0 62.8% 30.6%;
@@ -85,7 +86,7 @@
 
 /* Unified Button Styling */
 .btn-primary {
-  @apply bg-brand-teal hover:bg-brand-teal/90 text-white rounded-full px-4 py-2 text-sm font-medium shadow-sm transition-all;
+  @apply bg-[#800020] hover:bg-[#800020]/90 text-white rounded-full px-4 py-2 text-sm font-medium shadow-sm transition-all;
 }
 
 .btn-secondary {
@@ -110,56 +111,15 @@ button, .btn {
   @apply text-sm rounded-full;
 }
 
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  70% {
-    transform: scale(1.1);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0;
-  }
-}
-
-@keyframes unlock {
-  0% {
-    transform: rotate(0);
-  }
-  50% {
-    transform: rotate(180deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-pulse-ring {
-  animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-}
-
-.animate-unlock {
-  animation: unlock 2s ease-in-out;
-}
-
-.pin-digit {
-  @apply w-10 h-12 rounded-lg flex items-center justify-center font-mono text-xl font-bold;
-}
-
-.card-shadow {
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
-}
-
-.property-marker {
-  cursor: pointer;
-}
+/* ... keep existing code (animations and specialized component styles) */
 
 /* Bottom navigation styling */
 .bottom-nav-item {
   @apply flex flex-col items-center justify-center text-xs space-y-1 transition-colors duration-200 ease-in-out py-1 px-3 rounded-md;
+}
+
+.bottom-nav-item.active {
+  @apply text-[#800020];
 }
 
 @media (max-width: 640px) {
