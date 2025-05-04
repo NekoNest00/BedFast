@@ -41,9 +41,15 @@ export default function PropertyFilter({
   const [localFilters, setLocalFilters] = React.useState<FilterOptions>(filters);
   
   const handlePriceChange = (value: number[]) => {
+    // Ensure we always have exactly two values for priceRange
+    const priceRange: [number, number] = [
+      value[0] || 0,
+      value[1] || maxPrice
+    ];
+    
     setLocalFilters({
       ...localFilters,
-      priceRange: [value[0], value[1]]
+      priceRange
     });
   };
   
@@ -74,7 +80,7 @@ export default function PropertyFilter({
   };
   
   const resetFilters = () => {
-    const defaultFilters = {
+    const defaultFilters: FilterOptions = {
       priceRange: [0, maxPrice],
       propertyTypes: [],
       instant: false
