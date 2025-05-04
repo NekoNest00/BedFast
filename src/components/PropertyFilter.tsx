@@ -1,23 +1,12 @@
 
 import React from "react";
-import { X, ChevronDown } from "lucide-react";
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from "@/components/ui/popover";
-import {
-  Slider
-} from "@/components/ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import PriceRangeFilter from "./filters/PriceRangeFilter";
+import PropertyTypeFilter from "./filters/PropertyTypeFilter";
+import InstantAccessFilter from "./filters/InstantAccessFilter";
+import FilterActionButtons from "./filters/FilterActionButtons";
+export { FilterButton } from "./filters/FilterButton";
+export { SortButton } from "./filters/SortButton";
 
 export interface FilterOptions {
   priceRange: [number, number];
@@ -100,105 +89,30 @@ export default function PropertyFilter({
         )}
       </div>
       
-      {/* Price Range */}
-      <div className="mb-6">
-        <h4 className="font-medium mb-2">Price Range</h4>
-        <Slider
-          defaultValue={[localFilters.priceRange[0], localFilters.priceRange[1]]}
-          max={maxPrice}
-          step={10}
-          onValueChange={handlePriceChange}
-          className="mb-2"
-        />
-        <div className="flex items-center justify-between text-sm">
-          <span>${localFilters.priceRange[0]}</span>
-          <span>${localFilters.priceRange[1]}</span>
-        </div>
-      </div>
+      {/* Price Range Filter */}
+      <PriceRangeFilter 
+        priceRange={localFilters.priceRange}
+        maxPrice={maxPrice}
+        onPriceChange={handlePriceChange}
+      />
       
-      {/* Property Types */}
-      <div className="mb-6">
-        <h4 className="font-medium mb-2">Property Type</h4>
-        <div className="grid grid-cols-2 gap-2">
-          {["Apartment", "House", "Condo", "Villa"].map(type => (
-            <div key={type} className="flex items-center space-x-2">
-              <Checkbox
-                id={`type-${type}`}
-                checked={localFilters.propertyTypes.includes(type)}
-                onCheckedChange={() => handlePropertyTypeChange(type)}
-              />
-              <label htmlFor={`type-${type}`} className="text-sm">{type}</label>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Property Type Filter */}
+      <PropertyTypeFilter 
+        selectedTypes={localFilters.propertyTypes}
+        onTypeChange={handlePropertyTypeChange}
+      />
       
-      {/* Instant Access */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="instant-access"
-            checked={localFilters.instant}
-            onCheckedChange={(checked) => handleInstantChange(checked as boolean)}
-          />
-          <label htmlFor="instant-access">Instant Access Available</label>
-        </div>
-      </div>
+      {/* Instant Access Filter */}
+      <InstantAccessFilter 
+        checked={localFilters.instant}
+        onCheckedChange={handleInstantChange}
+      />
       
-      {/* Buttons */}
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={resetFilters} className="flex-1">
-          Reset All
-        </Button>
-        <Button onClick={applyFilters} className="flex-1">
-          Apply Filters
-        </Button>
-      </div>
+      {/* Action Buttons */}
+      <FilterActionButtons 
+        onReset={resetFilters}
+        onApply={applyFilters}
+      />
     </div>
-  );
-}
-
-export function FilterButton({ onOpen }: { onOpen: () => void }) {
-  return (
-    <button 
-      onClick={onOpen}
-      className="category-pill bg-muted text-muted-foreground whitespace-nowrap"
-    >
-      <span>Filters</span>
-    </button>
-  );
-}
-
-export function SortButton({ 
-  currentSort, 
-  onSortChange 
-}: { 
-  currentSort: string; 
-  onSortChange: (value: string) => void;
-}) {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button className="category-pill bg-muted text-muted-foreground whitespace-nowrap">
-          <span>Sort: {currentSort}</span>
-          <ChevronDown size={14} />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-48" align="start">
-        <div className="flex flex-col space-y-1">
-          {["Closest", "Top Rated", "Lowest Price", "Highest Price"].map((option) => (
-            <button
-              key={option}
-              className={`p-2 text-sm text-left rounded-md hover:bg-muted ${
-                currentSort === option ? "bg-muted font-medium" : ""
-              }`}
-              onClick={() => onSortChange(option)}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
   );
 }
