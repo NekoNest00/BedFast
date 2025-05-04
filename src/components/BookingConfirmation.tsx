@@ -81,8 +81,13 @@ export default function BookingConfirmation({
           <Button variant="outline" onClick={() => window.print()}>
             Download Details
           </Button>
-          <Button as={Link} to="/access/booking1" className="bg-gradient-to-r from-indigo-500 to-purple-600">
-            Manage Access
+          <Button 
+            asChild 
+            className="bg-gradient-to-r from-indigo-500 to-purple-600"
+          >
+            <Link to="/access/booking1">
+              Manage Access
+            </Link>
           </Button>
         </div>
       </CardContent>
