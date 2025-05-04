@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
@@ -15,6 +16,8 @@ import {
   Mail,
   Phone,
   MapPin,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
