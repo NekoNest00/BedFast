@@ -1,17 +1,30 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import PropertyCard, { Property } from "../components/PropertyCard";
 import { useTheme } from "../context/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
-import { ChevronRight, Filter } from "lucide-react";
+import { ChevronRight, Map, List, Filter } from "lucide-react";
+import PropertyMap from "../components/PropertyMap";
+import PropertyFilter, { FilterOptions, FilterButton, SortButton } from "../components/PropertyFilter";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function Index() {
   const { theme } = useTheme();
+  const [viewMode, setViewMode] = useState<"map" | "list">("map");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortOption, setSortOption] = useState("Top Rated");
+  const [filters, setFilters] = useState<FilterOptions>({
+    priceRange: [0, 500],
+    propertyTypes: [],
+    instant: false
+  });
+  const [mapboxToken, setMapboxToken] = useState<string>("");
   
   // Mock property data
-  const mockProperties: Property[] = [
+  const [properties, setProperties] = useState<Property[]>([
     {
       id: "prop1",
       name: "Modern Downtown Apartment",
@@ -48,10 +61,93 @@ export default function Index() {
       images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3"],
       instant: true,
     },
-  ];
+    {
+      id: "prop5",
+      name: "Waterfront Villa",
+      location: "Miami, Florida",
+      price: 359,
+      rating: 4.89,
+      images: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3"],
+      instant: true,
+    },
+    {
+      id: "prop6",
+      name: "Modern Condo",
+      location: "Seattle, Washington",
+      price: 219,
+      rating: 4.78,
+      images: ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3"],
+      instant: false,
+    },
+  ]);
 
   // Categories for filtering
   const categories = ["All", "Instant", "Urban", "Beach", "Mountain", "Lake"];
+
+  // Filter and sort properties
+  const filteredProperties = properties.filter(property => {
+    // Category filter
+    if (selectedCategory !== "All") {
+      if (selectedCategory === "Instant" && !property.instant) {
+        return false;
+      }
+      // Mock location-based filtering for categories
+      if (selectedCategory === "Beach" && !property.location.includes("Malibu") && !property.location.includes("Miami")) {
+        return false;
+      }
+      if (selectedCategory === "Mountain" && !property.location.includes("Aspen")) {
+        return false;
+      }
+      if (selectedCategory === "Urban" && !property.location.includes("Downtown")) {
+        return false;
+      }
+    }
+    
+    // Price range filter
+    if (property.price < filters.priceRange[0] || property.price > filters.priceRange[1]) {
+      return false;
+    }
+    
+    // Property type filter (mocked since we don't have this property in our data)
+    if (filters.propertyTypes.length > 0) {
+      // This is a mock implementation - in a real app you'd have proper property types
+      const mockTypeMap: Record<string, string[]> = {
+        "Apartment": ["Modern Downtown Apartment", "Downtown Loft"],
+        "House": ["Luxury Beach House"],
+        "Condo": ["Modern Condo"],
+        "Villa": ["Waterfront Villa", "Mountain View Cabin"]
+      };
+      
+      const matchesAnyType = filters.propertyTypes.some(type => {
+        return mockTypeMap[type]?.includes(property.name);
+      });
+      
+      if (!matchesAnyType) return false;
+    }
+    
+    // Instant access filter
+    if (filters.instant && !property.instant) {
+      return false;
+    }
+    
+    return true;
+  }).sort((a, b) => {
+    // Sort based on selected option
+    switch (sortOption) {
+      case "Top Rated":
+        return b.rating - a.rating;
+      case "Lowest Price":
+        return a.price - b.price;
+      case "Highest Price":
+        return b.price - a.price;
+      case "Closest":
+        // This would use actual distance calculation in a real app
+        // Here we're just using a mock implementation
+        return a.location.includes("Downtown") ? -1 : 1;
+      default:
+        return 0;
+    }
+  });
 
   return (
     <Layout>
@@ -65,7 +161,21 @@ export default function Index() {
           <ThemeToggle />
         </div>
 
-        {/* Categories */}
+        {/* View toggle */}
+        <div className="mb-4 flex justify-center">
+          <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "map" | "list")}>
+            <ToggleGroupItem value="map" aria-label="Map View">
+              <Map className="mr-2" size={16} />
+              Map
+            </ToggleGroupItem>
+            <ToggleGroupItem value="list" aria-label="List View">
+              <List className="mr-2" size={16} />
+              List
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
+        {/* Filters and Categories */}
         <div className="mb-6">
           <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-none">
             {categories.map((category) => (
@@ -81,43 +191,103 @@ export default function Index() {
                 {category}
               </button>
             ))}
-            <button className="p-2 rounded-full bg-muted">
-              <Filter size={18} className="text-muted-foreground" />
-            </button>
+            
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-full">
+                  <Filter size={18} className="mr-2" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[85vh]">
+                <PropertyFilter 
+                  filters={filters} 
+                  onFilterChange={setFilters} 
+                  maxPrice={500}
+                />
+              </SheetContent>
+            </Sheet>
+            
+            <SortButton 
+              currentSort={sortOption} 
+              onSortChange={setSortOption} 
+            />
           </div>
         </div>
 
-        {/* Featured collection */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Featured Stays</h2>
-            <button className="flex items-center text-sm text-muted-foreground">
-              View all <ChevronRight size={16} />
-            </button>
+        {/* Map View */}
+        {viewMode === "map" && (
+          <div className="h-[calc(100vh-240px)] mb-6">
+            <PropertyMap 
+              properties={filteredProperties} 
+              mapboxToken={mapboxToken} 
+            />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {mockProperties.map((property) => (
+        )}
+
+        {/* List View */}
+        {viewMode === "list" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8">
+            {filteredProperties.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
+            
+            {filteredProperties.length === 0 && (
+              <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-muted-foreground mb-2">No properties match your current filters</p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setFilters({
+                    priceRange: [0, 500],
+                    propertyTypes: [],
+                    instant: false
+                  })}
+                >
+                  Clear All Filters
+                </Button>
+              </div>
+            )}
           </div>
-        </section>
+        )}
 
-        {/* Instant access collection */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Instant Access</h2>
-            <button className="flex items-center text-sm text-muted-foreground">
-              View all <ChevronRight size={16} />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {mockProperties
-              .filter(p => p.instant)
-              .map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-          </div>
-        </section>
+        {/* Featured Properties (list view only) */}
+        {viewMode === "list" && filteredProperties.length > 0 && (
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Featured Stays</h2>
+              <button className="flex items-center text-sm text-muted-foreground">
+                View all <ChevronRight size={16} />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+              {filteredProperties
+                .slice(0, 3)
+                .map((property) => (
+                  <PropertyCard key={property.id} property={property} />
+                ))}
+            </div>
+          </section>
+        )}
+
+        {/* Instant access collection (list view only) */}
+        {viewMode === "list" && filteredProperties.some(p => p.instant) && (
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Instant Access</h2>
+              <button className="flex items-center text-sm text-muted-foreground">
+                View all <ChevronRight size={16} />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+              {filteredProperties
+                .filter(p => p.instant)
+                .slice(0, 3)
+                .map((property) => (
+                  <PropertyCard key={property.id} property={property} />
+                ))}
+            </div>
+          </section>
+        )}
       </div>
     </Layout>
   );
