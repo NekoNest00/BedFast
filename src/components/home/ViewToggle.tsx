@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Map, List, Search } from "lucide-react";
+import { Map, List } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Input } from "@/components/ui/input";
 
@@ -13,45 +13,31 @@ export default function ViewToggle({ viewMode, onViewModeChange }: ViewTogglePro
   const [showSearchBar, setShowSearchBar] = useState(false);
   
   return (
-    <div className="mb-4 space-y-3">
-      <div className="flex items-center justify-between">
+    <div className="mb-4">
+      <div className="flex items-center justify-between gap-2">
         <ToggleGroup 
           type="single" 
           value={viewMode} 
           onValueChange={(value) => value && onViewModeChange(value as "map" | "list")}
           className="bg-muted/80 rounded-full p-1"
         >
-          <ToggleGroupItem value="map" aria-label="Map View" className="rounded-full">
-            <Map className="mr-2" size={16} />
+          <ToggleGroupItem value="map" aria-label="Map View" className="rounded-full text-xs py-1 px-3">
+            <Map className="mr-1" size={14} />
             Map
           </ToggleGroupItem>
-          <ToggleGroupItem value="list" aria-label="List View" className="rounded-full">
-            <List className="mr-2" size={16} />
+          <ToggleGroupItem value="list" aria-label="List View" className="rounded-full text-xs py-1 px-3">
+            <List className="mr-1" size={14} />
             List
           </ToggleGroupItem>
         </ToggleGroup>
 
-        <button 
-          onClick={() => setShowSearchBar(!showSearchBar)}
-          className="bg-background rounded-full p-2 shadow-sm border flex items-center justify-center"
-        >
-          <Search size={18} />
-        </button>
+        <Input
+          type="text"
+          placeholder="Search properties..."
+          className="w-full max-w-xs h-8 text-xs rounded-full border-muted-foreground/20"
+          onClick={() => setShowSearchBar(true)}
+        />
       </div>
-
-      {/* Animated search bar */}
-      {showSearchBar && (
-        <div 
-          className="animate-fade-in w-full"
-        >
-          <Input
-            type="text"
-            placeholder="Search properties..."
-            className="w-full rounded-full border-muted-foreground/20"
-            autoFocus
-          />
-        </div>
-      )}
     </div>
   );
 }

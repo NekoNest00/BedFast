@@ -24,7 +24,7 @@ export default function FilterBar({
   onSortChange
 }: FilterBarProps) {
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-none">
         {/* AI Recommendation Button */}
         <RecommendationButton 
@@ -35,8 +35,8 @@ export default function FilterBar({
         {/* Enhanced Filters Button */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="rounded-full">
-              <Filter size={18} className="mr-2" />
+            <Button variant="outline" size="sm" className="rounded-full h-8 text-xs">
+              <Filter size={14} className="mr-1" />
               Filters
             </Button>
           </SheetTrigger>
