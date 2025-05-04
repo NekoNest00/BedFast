@@ -1,44 +1,17 @@
+
 import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Layout from "../components/Layout";
-import SmartLockInterface from "../components/SmartLockInterface";
 import BookingForm from "../components/BookingForm";
 import BookingConfirmation from "../components/BookingConfirmation";
-import { 
-  ArrowLeft, 
-  Heart, 
-  Share, 
-  MapPin, 
-  Star,
-  Wifi,
-  Tv,
-  Bath,
-  Home,
-  CalendarDays,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { 
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Alert,
-  AlertDescription,
-} from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
+import { Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// New component imports
+import PropertyImageCarousel from "../components/property/PropertyImageCarousel";
+import PropertyDetailsHeader from "../components/property/PropertyDetailsHeader";
+import PropertyDescription from "../components/property/PropertyDescription";
+import RelatedProperties from "../components/property/RelatedProperties";
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
@@ -141,204 +114,49 @@ export default function PropertyDetails() {
   return (
     <Layout>
       <div className="relative pb-16">
-        {/* Property Images Carousel */}
-        <div className="relative mb-4">
-          <Carousel className="w-full">
-            <CarouselContent>
-              {property.images.map((image, index) => (
-                <CarouselItem key={index}>
-                  <AspectRatio ratio={16 / 9} className="bg-muted">
-                    <img
-                      src={image}
-                      alt={`${property.name} - photo ${index + 1}`}
-                      className="h-full w-full object-cover rounded-lg"
-                    />
-                  </AspectRatio>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2 bg-background/80" />
-            <CarouselNext className="right-2 bg-background/80" />
-          </Carousel>
+        {/* Property Images and Header with Action Buttons */}
+        <PropertyImageCarousel 
+          images={property.images} 
+          propertyName={property.name} 
+        />
 
-          <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
-            <Link
-              to="/"
-              className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
-            >
-              <ArrowLeft size={20} className="text-foreground" />
-            </Link>
-            <div className="flex gap-2">
-              <button
-                onClick={handleShare}
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
-                aria-label="Share"
-              >
-                <Share size={20} className="text-foreground" />
-              </button>
-              <button
-                onClick={toggleFavorite}
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
-                aria-label="Save to favorites"
-              >
-                <Heart size={20} className={isFavorite ? "text-red-500 fill-red-500" : "text-foreground"} />
-              </button>
-            </div>
-          </div>
-        </div>
-
+        <PropertyDetailsHeader
+          property={property}
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
+          onShare={handleShare}
+        />
+        
         {/* Property Details */}
         <div className="container-app">
-          <div className="py-2">
-            <h1 className="text-xl font-bold mb-1">{property.name}</h1>
-            <div className="flex items-center gap-2 text-sm">
-              <div className="flex items-center">
-                <Star size={16} className="text-amber-500 mr-1" />
-                <span>{property.rating}</span>
-                <span className="mx-1">·</span>
-                <span className="underline">{property.reviews} reviews</span>
-              </div>
-              <span className="mx-1">·</span>
-              <div className="flex items-center text-muted-foreground">
-                <MapPin size={14} className="mr-1" />
-                <span>{property.location}</span>
-              </div>
+          <div className="lg:grid lg:grid-cols-3 gap-6 mt-4">
+            <div className="lg:col-span-2">
+              <PropertyDescription description={property.description} />
             </div>
-
-            {/* Host info */}
-            <div className="flex items-center mt-3">
-              <Avatar className="h-8 w-8 mr-2 border-2 border-background">
-                <AvatarImage src={property.hostImage} alt={property.hostName} />
-                <AvatarFallback>{property.hostName.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm">Hosted by {property.hostName}</span>
-            </div>
-
-            {/* Access Type Badge */}
-            <div className="mt-3">
-              <Badge variant="outline" className="bg-muted/50">
-                {property.accessType} Access
-              </Badge>
-            </div>
-
-            {/* Availability Info */}
-            <div className="mt-4 flex gap-3 text-sm text-muted-foreground">
-              <div className="flex items-center">
-                <Calendar size={15} className="mr-1" />
-                <span>Check-in: {property.checkIn}</span>
-              </div>
-              <div className="flex items-center">
-                <Calendar size={15} className="mr-1" />
-                <span>Check-out: {property.checkOut}</span>
-              </div>
-            </div>
-
-            {/* Price and Booking */}
-            <div className="mt-4">
-              <div className="lg:grid lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  {/* Property Description */}
-                  <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-2">About this place</h2>
-                    <p className="text-muted-foreground text-sm">
-                      {property.description}
-                    </p>
-                  </div>
-
-                  {/* Property Amenities */}
-                  <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-3">Amenities</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3">
-                        <Wifi size={20} className="text-muted-foreground" />
-                        <span>Wifi</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Tv size={20} className="text-muted-foreground" />
-                        <span>TV</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Bath size={20} className="text-muted-foreground" />
-                        <span>Bath</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Home size={20} className="text-muted-foreground" />
-                        <span>Kitchen</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 lg:mt-0">
-                  {bookingComplete ? (
-                    <BookingConfirmation 
-                      pin={generatedPin}
-                      propertyName={property.name}
-                      startDate={bookingDates.start}
-                      endDate={bookingDates.end}
-                    />
-                  ) : (
-                    <BookingForm
-                      propertyId={property.id}
-                      propertyName={property.name}
-                      pricePerNight={property.price}
-                      onBookingComplete={(pin) => {
-                        handleBookingComplete(pin);
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* AI-powered Related Properties */}
-            <div className="mt-8">
-              <h2 className="text-lg font-semibold mb-3">AI-Powered Suggestions</h2>
-              <Alert className="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-indigo-100 dark:from-indigo-950/30 dark:to-purple-950/30 dark:border-indigo-900/50">
-                <AlertDescription className="text-sm">
-                  Based on your preferences, we think you'll also love these properties.
-                </AlertDescription>
-              </Alert>
-              
-              <div className="overflow-x-auto pb-2 -mx-4 px-4">
-                <div className="flex gap-4">
-                  {relatedProperties.map((relatedProp) => (
-                    <Card key={relatedProp.id} className="min-w-[240px] max-w-[240px]">
-                      <Link to={`/property/${relatedProp.id}`}>
-                        <AspectRatio ratio={4/3} className="bg-muted">
-                          <img
-                            src={relatedProp.image}
-                            alt={relatedProp.name}
-                            className="h-full w-full object-cover rounded-t-lg"
-                          />
-                        </AspectRatio>
-                        <CardContent className="p-3">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h3 className="font-medium text-sm truncate">{relatedProp.name}</h3>
-                              <div className="flex items-center gap-1 mt-1">
-                                <span className="text-sm font-semibold">${relatedProp.price}</span>
-                                <span className="text-xs text-muted-foreground">night</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center">
-                              <Star size={14} className="text-amber-500" />
-                              <span className="text-xs ml-1">{relatedProp.rating}</span>
-                            </div>
-                          </div>
-                          {relatedProp.instant && (
-                            <Badge variant="outline" className="mt-2 text-xs bg-brand-red/10 text-brand-red border-brand-red/20">
-                              Instant Access
-                            </Badge>
-                          )}
-                        </CardContent>
-                      </Link>
-                    </Card>
-                  ))}
-                </div>
-              </div>
+            
+            <div className="mt-6 lg:mt-0">
+              {bookingComplete ? (
+                <BookingConfirmation 
+                  pin={generatedPin}
+                  propertyName={property.name}
+                  startDate={bookingDates.start}
+                  endDate={bookingDates.end}
+                />
+              ) : (
+                <BookingForm
+                  propertyId={property.id}
+                  propertyName={property.name}
+                  pricePerNight={property.price}
+                  onBookingComplete={(pin) => {
+                    handleBookingComplete(pin);
+                  }}
+                />
+              )}
             </div>
           </div>
+
+          {/* Related Properties */}
+          <RelatedProperties properties={relatedProperties} />
         </div>
       </div>
     </Layout>
