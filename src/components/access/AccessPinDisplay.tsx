@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "./displays/StatusBadge";
 import AccessWindow from "./displays/AccessWindow";
@@ -26,10 +26,22 @@ export default function AccessPinDisplay({
   isOffline = false,
   pinIssueTime = new Date(),
 }: AccessPinDisplayProps) {
+  const [lastSyncTime, setLastSyncTime] = useState<Date | undefined>(
+    isOffline ? new Date() : undefined
+  );
+  
+  // When going offline, record the last sync time
+  useEffect(() => {
+    if (isOffline && !lastSyncTime) {
+      setLastSyncTime(new Date());
+    }
+  }, [isOffline]);
+  
   const { accessStatus, hoursRemaining, shouldShowPin } = useAccessPin({
     startDate,
     endDate,
-    isOffline
+    isOffline,
+    lastSyncTime
   });
   
   return (
@@ -43,7 +55,7 @@ export default function AccessPinDisplay({
       </CardHeader>
       
       <CardContent className="p-5 space-y-4">
-        <OfflineIndicator isOffline={isOffline} />
+        <OfflineIndicator isOffline={isOffline} lastSyncTime={lastSyncTime} />
         
         <AccessHeader 
           accessStatus={accessStatus} 
@@ -59,7 +71,7 @@ export default function AccessPinDisplay({
           />
         </div>
         
-        <PinMetadata pinIssueTime={pinIssueTime} />
+        <PinMetadata pinIssueTime={pinIssueTime} lastSyncTime={lastSyncTime} />
       </CardContent>
     </Card>
   );
