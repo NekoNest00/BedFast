@@ -1,15 +1,37 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
-import { CalendarDays, LockKeyhole } from "lucide-react";
+import { CalendarDays, LockKeyhole, X, Check, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { format, isBefore, isAfter } from "date-fns";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+type BookingStatus = "upcoming" | "past";
+type AccessStatus = "active" | "upcoming" | "expired";
+
+interface Booking {
+  id: string;
+  propertyId: string;
+  propertyName: string;
+  location: string;
+  image: string;
+  checkIn: string;
+  checkOut: string;
+  accessCode: string;
+  status: BookingStatus;
+  cancellationAllowed?: boolean;
+}
 
 export default function Bookings() {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
 
-  // Mock bookings data
-  const bookings = [
+  // Mock bookings data - in a real app, this would come from an API
+  const bookings: Booking[] = [
     {
       id: "booking1",
       propertyId: "prop1",
@@ -20,6 +42,7 @@ export default function Bookings() {
       checkOut: "2025-05-15",
       accessCode: "1234",
       status: "upcoming",
+      cancellationAllowed: true,
     },
     {
       id: "booking2",
@@ -31,6 +54,7 @@ export default function Bookings() {
       checkOut: "2025-06-20",
       accessCode: "5678",
       status: "upcoming",
+      cancellationAllowed: false,
     },
     {
       id: "booking3",
@@ -42,6 +66,7 @@ export default function Bookings() {
       checkOut: "2025-04-05",
       accessCode: "9012",
       status: "past",
+      cancellationAllowed: false,
     },
   ];
 
@@ -51,6 +76,43 @@ export default function Bookings() {
       month: 'short', 
       day: 'numeric'
     });
+  };
+  
+  const getAccessStatus = (booking: Booking): AccessStatus => {
+    const now = new Date();
+    const checkIn = new Date(booking.checkIn);
+    const checkOut = new Date(booking.checkOut);
+    
+    if (isAfter(now, checkIn) && isBefore(now, checkOut)) {
+      return "active";
+    } else if (isBefore(now, checkIn)) {
+      return "upcoming";
+    } else {
+      return "expired";
+    }
+  };
+  
+  const renderAccessBadge = (accessStatus: AccessStatus) => {
+    switch (accessStatus) {
+      case "active":
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600 flex items-center gap-1">
+            <Check size={12} /> Active
+          </Badge>
+        );
+      case "upcoming":
+        return (
+          <Badge variant="outline" className="border-amber-500 text-amber-500 flex items-center gap-1">
+            <Clock size={12} /> Not Active Yet
+          </Badge>
+        );
+      case "expired":
+        return (
+          <Badge variant="outline" className="border-gray-400 text-gray-400 flex items-center gap-1">
+            <X size={12} /> Expired
+          </Badge>
+        );
+    }
   };
 
   if (!user) {
@@ -72,82 +134,133 @@ export default function Bookings() {
     <Layout>
       <div className="container-app py-6">
         <h1 className="text-2xl font-bold mb-6">Your Bookings</h1>
-
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-4">Upcoming</h2>
-          <div className="space-y-4">
+        
+        <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as "upcoming" | "past")}>
+          <TabsList className="grid grid-cols-2 mb-8">
+            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="past">Past</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="upcoming" className="space-y-4">
             {bookings
               .filter((booking) => booking.status === "upcoming")
-              .map((booking) => (
-                <div key={booking.id} className="border rounded-xl overflow-hidden flex">
-                  <div className="w-1/3 aspect-square">
-                    <img
-                      src={booking.image}
-                      alt={booking.propertyName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-medium">{booking.propertyName}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{booking.location}</p>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <CalendarDays size={14} className="mr-1" />
-                        <span>
-                          {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
-                        </span>
+              .map((booking) => {
+                const accessStatus = getAccessStatus(booking);
+                return (
+                  <Card key={booking.id} className="overflow-hidden">
+                    <Link to={`/access/${booking.id}`} className="flex h-full">
+                      <div className="w-1/3 aspect-square">
+                        <img
+                          src={booking.image}
+                          alt={booking.propertyName}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <Link
-                        to={`/property/${booking.propertyId}`}
-                        className="flex items-center text-xs text-primary"
-                      >
-                        <LockKeyhole size={14} className="mr-1" />
-                        Access Property
-                      </Link>
-                      <button className="text-xs btn-outline py-1">View Details</button>
-                    </div>
-                  </div>
+                      <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start mb-1">
+                            <h3 className="font-medium">{booking.propertyName}</h3>
+                            {renderAccessBadge(accessStatus)}
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">{booking.location}</p>
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <CalendarDays size={14} className="mr-1" />
+                            <span>
+                              {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                          {accessStatus === "active" && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              asChild 
+                              className="text-xs"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Link to={`/access/${booking.id}`} className="flex items-center gap-1">
+                                <LockKeyhole size={14} />
+                                View PIN
+                              </Link>
+                            </Button>
+                          )}
+                          
+                          {booking.cancellationAllowed && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-xs text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 ml-auto"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // Cancellation logic would go here
+                                alert(`Booking ${booking.id} cancelled`);
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Link>
+                  </Card>
+                );
+              })}
+              
+              {bookings.filter(b => b.status === "upcoming").length === 0 && (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground">No upcoming bookings</p>
                 </div>
-              ))}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Past Stays</h2>
-          <div className="space-y-4">
+              )}
+          </TabsContent>
+          
+          <TabsContent value="past" className="space-y-4">
             {bookings
               .filter((booking) => booking.status === "past")
               .map((booking) => (
-                <div key={booking.id} className="border rounded-xl overflow-hidden flex opacity-70">
-                  <div className="w-1/3 aspect-square">
-                    <img
-                      src={booking.image}
-                      alt={booking.propertyName}
-                      className="w-full h-full object-cover grayscale"
-                    />
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-medium">{booking.propertyName}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{booking.location}</p>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <CalendarDays size={14} className="mr-1" />
-                        <span>
-                          {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
-                        </span>
+                <Card key={booking.id} className="overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
+                  <Link to={`/access/${booking.id}`} className="flex h-full">
+                    <div className="w-1/3 aspect-square">
+                      <img
+                        src={booking.image}
+                        alt={booking.propertyName}
+                        className="w-full h-full object-cover grayscale"
+                      />
+                    </div>
+                    <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-medium">{booking.propertyName}</h3>
+                        <p className="text-sm text-muted-foreground mb-2">{booking.location}</p>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <CalendarDays size={14} className="mr-1" />
+                          <span>
+                            {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Completed</span>
-                      <button className="text-xs btn-outline py-1">Write Review</button>
-                    </div>
-                  </div>
-                </div>
+                      <div className="mt-4 flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs">Completed</Badge>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs"
+                        >
+                          Write Review
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Link>
+                </Card>
               ))}
-          </div>
-        </div>
+              
+              {bookings.filter(b => b.status === "past").length === 0 && (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground">No past bookings</p>
+                </div>
+              )}
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
