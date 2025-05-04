@@ -4,20 +4,18 @@ import Layout from "../components/Layout";
 import PropertyCard, { Property } from "../components/PropertyCard";
 import { useTheme } from "../context/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
-import { ChevronRight, Map, List, Filter } from "lucide-react";
+import { Map, List, Filter } from "lucide-react";
 import PropertyMap from "../components/PropertyMap";
-import PropertyFilter, { FilterOptions, FilterButton, SortButton } from "../components/PropertyFilter";
+import PropertyFilter, { FilterOptions, SortButton } from "../components/PropertyFilter";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import RecommendationButton from "../components/recommendations/RecommendationButton";
-import RecommendationCarousel from "../components/recommendations/RecommendationCarousel";
 import { useRecommendations } from "../hooks/useRecommendations";
 
 export default function Index() {
   const { theme } = useTheme();
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOption, setSortOption] = useState("Top Rated");
   const [showRecommended, setShowRecommended] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
@@ -88,28 +86,11 @@ export default function Index() {
     },
   ]);
 
-  // Streamlined categories with recommendation button
-  const categories = ["All", "Instant", "Beach", "Mountain"];
-
   // Filter and sort properties
   const filteredProperties = properties.filter(property => {
     // If showing recommendations, skip regular filtering
     if (showRecommended) {
       return false;
-    }
-    
-    // Category filter
-    if (selectedCategory !== "All") {
-      if (selectedCategory === "Instant" && !property.instant) {
-        return false;
-      }
-      // Mock location-based filtering for categories
-      if (selectedCategory === "Beach" && !property.location.includes("Malibu") && !property.location.includes("Miami")) {
-        return false;
-      }
-      if (selectedCategory === "Mountain" && !property.location.includes("Aspen")) {
-        return false;
-      }
     }
     
     // Price range filter
@@ -160,9 +141,6 @@ export default function Index() {
 
   const toggleRecommended = () => {
     setShowRecommended(!showRecommended);
-    if (!showRecommended) {
-      setSelectedCategory("All");
-    }
   };
 
   const recommendedPropertySet = recommendations.find(rec => rec.type === 'personalized');
@@ -193,7 +171,7 @@ export default function Index() {
           </ToggleGroup>
         </div>
 
-        {/* Filters and Categories */}
+        {/* Filters and For You button */}
         <div className="mb-6">
           <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-none">
             {/* AI Recommendation Button */}
@@ -202,21 +180,7 @@ export default function Index() {
               active={showRecommended} 
             />
             
-            {/* Streamlined Categories */}
-            {!showRecommended && categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`category-pill whitespace-nowrap ${
-                  selectedCategory === category
-                    ? "bg-foreground text-background"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-            
+            {/* Enhanced Filters Button */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" className="rounded-full">
@@ -233,6 +197,7 @@ export default function Index() {
               </SheetContent>
             </Sheet>
             
+            {/* Sort Button */}
             <SortButton 
               currentSort={sortOption} 
               onSortChange={setSortOption} 
@@ -250,24 +215,16 @@ export default function Index() {
           </div>
         )}
 
-        {/* AI Recommendations View */}
+        {/* AI Recommendations View - Just displaying as a list now */}
         {showRecommended && recommendedPropertySet && (
           <div className="mb-8">
-            <RecommendationCarousel 
-              recommendations={recommendedPropertySet} 
-              className="mb-8"
-            />
-            
-            {recommendations
-              .filter(rec => rec.type !== 'personalized')
-              .map(recSet => (
-                <RecommendationCarousel 
-                  key={recSet.type}
-                  recommendations={recSet}
-                  className="mb-8"
-                />
-              ))
-            }
+            <h3 className="text-lg font-semibold mb-4">{recommendedPropertySet.title}</h3>
+            <p className="text-sm text-muted-foreground mb-4">{recommendedPropertySet.description}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+              {recommendedPropertySet.properties.map(property => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
           </div>
         )}
 
@@ -294,26 +251,6 @@ export default function Index() {
               </div>
             )}
           </div>
-        )}
-
-        {/* Instant access collection (list view only) */}
-        {viewMode === "list" && !showRecommended && filteredProperties.some(p => p.instant) && (
-          <section className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Instant Access</h2>
-              <button className="flex items-center text-sm text-muted-foreground">
-                View all <ChevronRight size={16} />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-              {filteredProperties
-                .filter(p => p.instant)
-                .slice(0, 3)
-                .map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
-            </div>
-          </section>
         )}
       </div>
     </Layout>
