@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import PropertyCard, { Property } from "../components/PropertyCard";
@@ -9,8 +10,6 @@ import PropertyFilter, { FilterOptions, FilterButton, SortButton } from "../comp
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import RecommendationCarousel from "@/components/recommendations/RecommendationCarousel";
-import { useRecommendations } from "@/hooks/useRecommendations";
 
 export default function Index() {
   const { theme } = useTheme();
@@ -150,9 +149,6 @@ export default function Index() {
     }
   });
 
-  // Get AI-powered recommendations
-  const { recommendedProperties, loading: loadingRecommendations } = useRecommendations();
-  
   return (
     <Layout>
       <div className="container-app">
@@ -178,16 +174,6 @@ export default function Index() {
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
-
-        {/* Personalized AI Recommendations - shown at the top for both view modes */}
-        {!loadingRecommendations && recommendedProperties.length > 0 && (
-          <RecommendationCarousel
-            title="Recommended for You" 
-            description="Based on your browsing history and preferences"
-            properties={recommendedProperties}
-            className="mb-6 animate-fade-in" 
-          />
-        )}
 
         {/* Filters and Categories */}
         <div className="mb-6">
