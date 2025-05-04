@@ -15,6 +15,7 @@ import Bookings from "./pages/Bookings";
 import AccessDetails from "./pages/AccessDetails";
 import NotFound from "./pages/NotFound";
 import ViewingDetails from "./pages/ViewingDetails";
+import Access from "./pages/Access"; // New Access list page
 
 const queryClient = new QueryClient();
 
@@ -32,7 +33,9 @@ const App = () => (
               <Route path="/property/:id" element={<PropertyDetails />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/bookings" element={<Bookings />} />
+              <Route path="/access" element={<Access />} />
               <Route path="/access/:id" element={<AccessDetails />} />
+              <Route path="/viewings" element={<ViewingDetails />} />
               <Route path="/viewing/:id" element={<ViewingDetails />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
