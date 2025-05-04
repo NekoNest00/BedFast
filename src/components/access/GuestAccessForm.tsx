@@ -1,14 +1,14 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { format, addHours } from "date-fns";
 import { SheetClose } from "@/components/ui/sheet";
-import { Copy, Check, Clock, Mail, Send, Trash2 } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
-import { Card, CardContent } from "@/components/ui/card";
+import { addHours } from "date-fns";
+import GuestNameForm from "./forms/GuestNameForm";
+import AccessDurationSlider from "./forms/AccessDurationSlider";
+import PinDisplay from "./displays/PinDisplay";
+import PinActions from "./forms/PinActions";
+import AccessLog from "./displays/AccessLog";
 
 interface GuestAccessFormProps {
   propertyName: string;
@@ -144,10 +144,6 @@ export default function GuestAccessForm({
     setGeneratedPin("");
   };
   
-  const handleAccessHoursChange = (value: number[]) => {
-    setAccessHours(value[0]);
-  };
-  
   return (
     <div className="py-4 space-y-6">
       {!generatedPin ? (
@@ -155,86 +151,26 @@ export default function GuestAccessForm({
           <div className="mb-4">
             <p className="text-sm text-muted-foreground mb-2">
               Create temporary access for guests during your stay at {propertyName}.
-              Guest access is limited to your booking period from {format(startDate, "MMM d")} to {format(endDate, "MMM d")}.
+              Guest access is limited to your booking period from {startDate.toLocaleDateString()} to {endDate.toLocaleDateString()}.
             </p>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="guestName">Guest Name</Label>
-            <Input 
-              id="guestName"
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              placeholder="Enter guest's name"
-              required
-            />
-          </div>
+          <GuestNameForm
+            guestName={guestName}
+            setGuestName={setGuestName}
+            guestEmail={guestEmail}
+            setGuestEmail={setGuestEmail}
+            guestPhone={guestPhone}
+            setGuestPhone={setGuestPhone}
+            contactMethod={contactMethod}
+            setContactMethod={setContactMethod}
+          />
           
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="contactMethod">Contact Method</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={contactMethod === "email" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => setContactMethod("email")}
-                >
-                  <Mail className="mr-2 h-4 w-4" /> Email
-                </Button>
-                <Button
-                  type="button"
-                  variant={contactMethod === "sms" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => setContactMethod("sms")}
-                >
-                  <Send className="mr-2 h-4 w-4" /> SMS
-                </Button>
-              </div>
-            </div>
-            
-            {contactMethod === "email" ? (
-              <div className="space-y-2">
-                <Label htmlFor="guestEmail">Guest Email</Label>
-                <Input 
-                  id="guestEmail"
-                  type="email"
-                  value={guestEmail}
-                  onChange={(e) => setGuestEmail(e.target.value)}
-                  placeholder="Enter guest's email"
-                />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="guestPhone">Guest Phone</Label>
-                <Input 
-                  id="guestPhone"
-                  type="tel"
-                  value={guestPhone}
-                  onChange={(e) => setGuestPhone(e.target.value)}
-                  placeholder="Enter guest's phone number"
-                />
-              </div>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label htmlFor="accessDuration">Access Duration</Label>
-              <span className="text-sm text-muted-foreground">{accessHours} hours</span>
-            </div>
-            <Slider
-              id="accessDuration"
-              min={1}
-              max={maxHours}
-              step={1}
-              value={[accessHours]}
-              onValueChange={handleAccessHoursChange}
-            />
-            <p className="text-xs text-muted-foreground">
-              Set how long the guest will have access (1-{maxHours} hours)
-            </p>
-          </div>
+          <AccessDurationSlider
+            accessHours={accessHours}
+            setAccessHours={setAccessHours}
+            maxHours={maxHours}
+          />
           
           <Button 
             type="submit" 
@@ -253,75 +189,19 @@ export default function GuestAccessForm({
             </p>
           </div>
           
-          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-center">
-            <p className="text-sm text-muted-foreground mb-2">Guest PIN</p>
-            <div className="flex gap-2 justify-center mb-3">
-              {generatedPin.split('').map((digit, i) => (
-                <div 
-                  key={i} 
-                  className="w-10 h-12 rounded-md bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-mono text-lg font-bold"
-                >
-                  {digit}
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <p>
-                Expires {format(accessEndTime, "MMM d, h:mm a")}
-              </p>
-            </div>
-          </div>
+          <PinDisplay 
+            generatedPin={generatedPin} 
+            accessEndTime={accessEndTime} 
+          />
           
-          <div className="flex flex-col gap-3">
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={copyGuestPinToClipboard}
-            >
-              <Copy className="mr-2 h-4 w-4" /> Copy PIN to Clipboard
-            </Button>
-            
-            <Button 
-              className="w-full"
-              onClick={shareWithGuest}
-            >
-              {contactMethod === "email" ? (
-                <Mail className="mr-2 h-4 w-4" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Share with Guest via {contactMethod.toUpperCase()}
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full border-destructive text-destructive hover:bg-destructive/10"
-              onClick={revokeAccess}
-            >
-              <Trash2 className="mr-2 h-4 w-4" /> Revoke Access
-            </Button>
-            
-            <SheetClose asChild>
-              <Button variant="ghost" className="w-full">Done</Button>
-            </SheetClose>
-          </div>
+          <PinActions
+            copyGuestPinToClipboard={copyGuestPinToClipboard}
+            shareWithGuest={shareWithGuest}
+            revokeAccess={revokeAccess}
+            contactMethod={contactMethod}
+          />
           
-          {accessLog.length > 0 && (
-            <Card className="mt-4">
-              <CardContent className="pt-4">
-                <h4 className="text-sm font-medium mb-2">Access Log</h4>
-                <div className="space-y-2 text-xs text-muted-foreground max-h-28 overflow-y-auto">
-                  {accessLog.map((entry, i) => (
-                    <div key={i} className="flex justify-between py-1 border-b">
-                      <span>{entry.action}</span>
-                      <span>{format(entry.time, "h:mm a")}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <AccessLog accessLog={accessLog} />
         </div>
       )}
     </div>
