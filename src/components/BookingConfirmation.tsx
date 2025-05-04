@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Check, Clock, Pin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface BookingConfirmationProps {
   pin: string;
@@ -76,9 +77,12 @@ export default function BookingConfirmation({
           </p>
         </div>
         
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
           <Button variant="outline" onClick={() => window.print()}>
             Download Details
+          </Button>
+          <Button as={Link} to="/access/booking1" className="bg-gradient-to-r from-indigo-500 to-purple-600">
+            Manage Access
           </Button>
         </div>
       </CardContent>

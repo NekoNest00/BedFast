@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import PropertyDetails from "./pages/PropertyDetails";
 import Profile from "./pages/Profile";
 import Bookings from "./pages/Bookings";
+import AccessDetails from "./pages/AccessDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/property/:id" element={<PropertyDetails />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/bookings" element={<Bookings />} />
+              <Route path="/access/:id" element={<AccessDetails />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
