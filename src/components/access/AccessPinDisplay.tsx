@@ -7,7 +7,7 @@ import OfflineIndicator from "./displays/OfflineIndicator";
 import AccessHeader from "./displays/AccessHeader";
 import PinCodeDisplay from "./displays/PinCodeDisplay";
 import PinMetadata from "./displays/PinMetadata";
-import { useAccessPin } from "@/hooks/useAccessPin";
+import { useAccessStatus } from "@/hooks/useAccessStatus";
 
 interface AccessPinDisplayProps {
   pin: string;
@@ -37,12 +37,16 @@ export default function AccessPinDisplay({
     }
   }, [isOffline]);
   
-  const { accessStatus, hoursRemaining, shouldShowPin } = useAccessPin({
-    startDate,
-    endDate,
-    isOffline,
-    lastSyncTime
-  });
+  // Use our enhanced access status hook
+  const { 
+    accessStatus, 
+    hoursRemaining, 
+    shouldShowPin,
+    formattedTimeRemaining 
+  } = useAccessStatus({
+    accessStart: startDate || new Date(),
+    accessEnd: endDate || new Date()
+  }, isOffline);
   
   return (
     <Card className="w-full border shadow-md overflow-hidden">
@@ -61,6 +65,7 @@ export default function AccessPinDisplay({
           accessStatus={accessStatus} 
           hoursRemaining={hoursRemaining} 
           startDate={startDate}
+          formattedTimeRemaining={formattedTimeRemaining}
         />
         
         <div className="pt-2 pb-1">

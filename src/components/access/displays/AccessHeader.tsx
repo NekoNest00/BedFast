@@ -8,9 +8,15 @@ interface AccessHeaderProps {
   accessStatus: AccessStatus;
   hoursRemaining: number;
   startDate?: Date;
+  formattedTimeRemaining?: string;
 }
 
-export default function AccessHeader({ accessStatus, hoursRemaining, startDate }: AccessHeaderProps) {
+export default function AccessHeader({ 
+  accessStatus, 
+  hoursRemaining, 
+  startDate,
+  formattedTimeRemaining
+}: AccessHeaderProps) {
   return (
     <div className="flex items-center gap-3 w-full p-2">
       <div className="w-12 h-12 rounded-full bg-brand-red/10 dark:bg-brand-red/20 flex items-center justify-center flex-shrink-0">
@@ -21,7 +27,9 @@ export default function AccessHeader({ accessStatus, hoursRemaining, startDate }
         {accessStatus === "active" && (
           <p className="text-sm text-brand-red flex items-center gap-1 truncate">
             <Clock size={14} className="flex-shrink-0" />
-            <span>Access active - {hoursRemaining} hrs remaining</span>
+            <span>
+              Access active - {formattedTimeRemaining || `${hoursRemaining} hrs remaining`}
+            </span>
           </p>
         )}
         {accessStatus === "upcoming" && startDate && (

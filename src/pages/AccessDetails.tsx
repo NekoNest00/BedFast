@@ -36,11 +36,17 @@ export default function AccessDetails() {
     supportPhone: "(123) 456-7890"
   };
   
-  // Check if we're within the access window
-  const { isWithinAccessWindow } = useAccessStatus({
+  // Use the enhanced hook to determine access status
+  const { 
+    isWithinAccessWindow,
+    accessStatus,
+    hoursRemaining,
+    formattedTimeRemaining,
+    shouldShowPin
+  } = useAccessStatus({
     accessStart: booking.accessStart,
     accessEnd: booking.accessEnd
-  });
+  }, isOffline);
   
   // Generate mock access log entries
   const accessLogEntries = [
