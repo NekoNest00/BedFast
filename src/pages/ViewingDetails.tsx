@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams, Link } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -340,15 +339,15 @@ export default function ViewingDetails() {
               <h3 className="font-medium mb-3">Next Steps</h3>
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <p className="text-sm">View the property using your temporary PIN</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <p className="text-sm">Submit your feedback after the viewing</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <p className="text-sm">If interested, you can book the property from the main listing</p>
                 </div>
               </div>

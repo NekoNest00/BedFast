@@ -42,6 +42,9 @@ export default function BookingCard({
   cancellationAllowed = false,
   onCancel
 }: BookingCardProps) {
+  // Consistent icon size
+  const iconSize = 12;
+  
   return (
     <Card key={id} className="overflow-hidden h-[120px]">
       <Link to={`/access/${id}`} className="flex h-full">
@@ -68,7 +71,7 @@ export default function BookingCard({
             </div>
             <p className="text-xs text-muted-foreground mb-1 line-clamp-1">{location}</p>
             <div className="flex items-center text-xs text-muted-foreground">
-              <CalendarDays size={12} className="mr-1 flex-shrink-0" />
+              <CalendarDays size={iconSize} className="mr-1 flex-shrink-0" />
               <span className="truncate">
                 {formatDate(checkIn)} - {formatDate(checkOut)}
               </span>
@@ -85,7 +88,7 @@ export default function BookingCard({
                 onClick={(e) => e.stopPropagation()}
               >
                 <Link to={`/access/${id}`} className="flex items-center gap-1">
-                  <LockKeyhole size={12} />
+                  <LockKeyhole size={iconSize} className="flex-shrink-0" />
                   View PIN
                 </Link>
               </Button>
