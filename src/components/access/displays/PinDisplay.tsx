@@ -10,9 +10,9 @@ interface PinDisplayProps {
 
 export default function PinDisplay({ generatedPin, accessEndTime }: PinDisplayProps) {
   return (
-    <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-center">
+    <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-center w-full">
       <p className="text-sm text-muted-foreground mb-2">Guest PIN</p>
-      <div className="flex gap-2 justify-center mb-3 max-w-xs mx-auto">
+      <div className="flex gap-2 justify-center mb-3 mx-auto">
         {generatedPin.split('').map((digit, i) => (
           <div 
             key={i} 

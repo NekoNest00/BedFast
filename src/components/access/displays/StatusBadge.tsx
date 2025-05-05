@@ -13,7 +13,7 @@ export default function StatusBadge({ accessStatus }: StatusBadgeProps) {
   switch (accessStatus) {
     case "active":
       return (
-        <Badge className="bg-green-500 hover:bg-green-600 flex items-center gap-1 px-2 py-1 h-6 text-xs font-medium">
+        <Badge className="bg-green-500 hover:bg-green-600 flex items-center gap-1 px-3 py-1 h-6 text-xs font-medium w-[110px] justify-center">
           <Check size={12} />
           <span>Active</span>
         </Badge>
@@ -22,7 +22,7 @@ export default function StatusBadge({ accessStatus }: StatusBadgeProps) {
       return (
         <Badge 
           variant="outline" 
-          className="border-amber-500 text-amber-500 flex items-center gap-1 px-2 py-1 h-6 text-xs font-medium"
+          className="border-amber-500 text-amber-500 flex items-center gap-1 px-3 py-1 h-6 text-xs font-medium w-[110px] justify-center"
         >
           <Clock size={12} />
           <span>Not Yet Active</span>
@@ -32,7 +32,7 @@ export default function StatusBadge({ accessStatus }: StatusBadgeProps) {
       return (
         <Badge 
           variant="outline" 
-          className="border-gray-400 text-gray-400 flex items-center gap-1 px-2 py-1 h-6 text-xs font-medium"
+          className="border-gray-400 text-gray-400 flex items-center gap-1 px-3 py-1 h-6 text-xs font-medium w-[110px] justify-center"
         >
           <X size={12} />
           <span>Expired</span>

@@ -12,7 +12,7 @@ interface AccessHeaderProps {
 
 export default function AccessHeader({ accessStatus, hoursRemaining, startDate }: AccessHeaderProps) {
   return (
-    <div className="flex items-center gap-3 w-full p-1">
+    <div className="flex items-center gap-3 w-full p-2">
       <div className="w-12 h-12 rounded-full bg-brand-red/10 dark:bg-brand-red/20 flex items-center justify-center flex-shrink-0">
         <Lock size={24} className="text-brand-red" />
       </div>

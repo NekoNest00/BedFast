@@ -124,40 +124,42 @@ export default function Bookings() {
               .map((booking) => {
                 const accessStatus = getAccessStatus(booking);
                 return (
-                  <Card key={booking.id} className="overflow-hidden">
+                  <Card key={booking.id} className="overflow-hidden h-[120px]">
                     <Link to={`/access/${booking.id}`} className="flex h-full">
-                      <div className="w-1/3 aspect-square">
+                      <div className="w-1/3 h-full flex-shrink-0">
                         <img
                           src={booking.image}
                           alt={booking.propertyName}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                      <CardContent className="p-3 flex-1 flex flex-col justify-between">
                         <div>
                           <div className="flex justify-between items-start mb-1">
-                            <h3 className="font-medium line-clamp-1">{booking.propertyName}</h3>
-                            <StatusBadge accessStatus={accessStatus} />
+                            <h3 className="font-medium line-clamp-1 text-sm">{booking.propertyName}</h3>
+                            <div className="flex-shrink-0">
+                              <StatusBadge accessStatus={accessStatus} />
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2 line-clamp-1">{booking.location}</p>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <CalendarDays size={14} className="mr-1 flex-shrink-0" />
+                          <p className="text-xs text-muted-foreground mb-1 line-clamp-1">{booking.location}</p>
+                          <div className="flex items-center text-xs text-muted-foreground">
+                            <CalendarDays size={12} className="mr-1 flex-shrink-0" />
                             <span className="truncate">
                               {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between mt-4 gap-2">
+                        <div className="flex items-center justify-between mt-1 gap-2">
                           {accessStatus === "active" && (
                             <Button 
                               variant="outline" 
                               size="sm" 
                               asChild 
-                              className="text-xs"
+                              className="text-xs h-7 px-2"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Link to={`/access/${booking.id}`} className="flex items-center gap-1">
-                                <LockKeyhole size={14} />
+                                <LockKeyhole size={12} />
                                 View PIN
                               </Link>
                             </Button>
@@ -167,7 +169,7 @@ export default function Bookings() {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="text-xs text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 ml-auto"
+                              className="text-xs text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 ml-auto h-7 px-2"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -196,32 +198,32 @@ export default function Bookings() {
             {bookings
               .filter((booking) => booking.status === "past")
               .map((booking) => (
-                <Card key={booking.id} className="overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
+                <Card key={booking.id} className="overflow-hidden opacity-80 hover:opacity-100 transition-opacity h-[120px]">
                   <Link to={`/access/${booking.id}`} className="flex h-full">
-                    <div className="w-1/3 aspect-square">
+                    <div className="w-1/3 h-full flex-shrink-0">
                       <img
                         src={booking.image}
                         alt={booking.propertyName}
                         className="w-full h-full object-cover grayscale"
                       />
                     </div>
-                    <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                    <CardContent className="p-3 flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-medium line-clamp-1">{booking.propertyName}</h3>
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-1">{booking.location}</p>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <CalendarDays size={14} className="mr-1 flex-shrink-0" />
+                        <h3 className="font-medium line-clamp-1 text-sm">{booking.propertyName}</h3>
+                        <p className="text-xs text-muted-foreground mb-1 line-clamp-1">{booking.location}</p>
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <CalendarDays size={12} className="mr-1 flex-shrink-0" />
                           <span className="truncate">
                             {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
                           </span>
                         </div>
                       </div>
-                      <div className="mt-4 flex items-center justify-between">
-                        <Badge variant="outline" className="text-xs">Completed</Badge>
+                      <div className="mt-1 flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs h-6 px-3">Completed</Badge>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs"
+                          className="text-xs h-7 px-2"
                         >
                           Write Review
                         </Button>
