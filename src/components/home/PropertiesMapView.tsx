@@ -1,20 +1,16 @@
 
 import React from "react";
 import { Property } from "../PropertyCard";
-import PropertyMap from "../PropertyMap";
+import GoogleMapsPlaceholder from "../GoogleMapsPlaceholder";
 
 interface PropertiesMapViewProps {
   properties: Property[];
-  mapboxToken: string;
 }
 
-export default function PropertiesMapView({ properties, mapboxToken }: PropertiesMapViewProps) {
+export default function PropertiesMapView({ properties }: PropertiesMapViewProps) {
   return (
     <div className="h-[calc(100vh-240px)] mb-6">
-      <PropertyMap 
-        properties={properties} 
-        mapboxToken={mapboxToken} 
-      />
+      <GoogleMapsPlaceholder properties={properties} />
     </div>
   );
 }

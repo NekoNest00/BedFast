@@ -1,7 +1,8 @@
 
 import React from "react";
-import { Heart } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export interface Property {
   id: string;
@@ -52,6 +53,20 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             <span className="text-foreground">${property.price}</span>
             <span className="text-muted-foreground"> night</span>
           </p>
+          
+          <div className="flex gap-2 mt-3 pt-2">
+            <Button variant="outline" size="sm" className="w-1/2 bg-background text-foreground" asChild>
+              <Link to={`/property/${property.id}`} className="flex items-center justify-center">
+                <Eye size={16} className="mr-1" />
+                View now
+              </Link>
+            </Button>
+            <Button variant="default" size="sm" className="w-1/2 bg-brand-red hover:bg-brand-red/90" asChild>
+              <Link to={`/property/${property.id}`}>
+                Book now
+              </Link>
+            </Button>
+          </div>
         </div>
       </Link>
     </div>

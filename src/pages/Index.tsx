@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { Property } from "../components/PropertyCard";
@@ -25,7 +24,6 @@ export default function Index() {
     propertyTypes: [],
     instant: false
   });
-  const [mapboxToken, setMapboxToken] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   
   // Fetch AI recommendations
@@ -206,7 +204,6 @@ export default function Index() {
         {viewMode === "map" && !showRecommended && (
           <PropertiesMapView 
             properties={filteredProperties}
-            mapboxToken={mapboxToken}
           />
         )}
 
