@@ -4,18 +4,10 @@ import { Property } from "./PropertyCard";
 import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// Fix the marker icon issue with Leaflet in React
-// This is needed because Leaflet's default marker icons are loaded relative to the CSS file
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-});
-
+// Include Leaflet styles directly in the component
+// instead of importing the CSS file
 interface OpenStreetMapViewProps {
   properties: Property[];
 }
@@ -48,7 +40,7 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     markersRef.current = [];
 
     // Add property markers
-    properties.forEach((property, index) => {
+    properties.forEach((property) => {
       // For demo purposes, generate random locations near New York City
       const randomLat = 40.7128 + (Math.random() - 0.5) * 0.05;
       const randomLng = -74.006 + (Math.random() - 0.5) * 0.05;
@@ -122,6 +114,7 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     </div>
   );
 
+  // Adding Leaflet CSS inline instead of importing from node_modules
   return (
     <div className="relative w-full h-full bg-muted/30 rounded-xl overflow-hidden flex flex-col items-center justify-center">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzNzM3MzciIGZpbGwtb3BhY2l0eT0iMC4wNyI+PHBhdGggZD0iTTM2IDM0djI2aDI0VjM0SDM2ek0wIDM0djI2aDI0VjM0SDB6TTM2IDBoLTJ2MjRoMjZWMEgzNnptLTEwIDB2MjRoMjRWMEgyNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10" />
@@ -131,7 +124,8 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
         {renderPlaceholder()}
       </div>
 
-      <style jsx>{`
+      <style>
+        {`
         .leaflet-container {
           width: 100%;
           height: 100%;
@@ -141,7 +135,8 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
           background: transparent;
           border: none;
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 }
