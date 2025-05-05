@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Property } from "../PropertyCard";
-import GoogleMapsPlaceholder from "../GoogleMapsPlaceholder";
+import OpenStreetMapView from "../OpenStreetMapView";
 
 interface PropertiesMapViewProps {
   properties: Property[];
@@ -10,7 +10,7 @@ interface PropertiesMapViewProps {
 export default function PropertiesMapView({ properties }: PropertiesMapViewProps) {
   return (
     <div className="h-[calc(100vh-240px)] mb-6">
-      <GoogleMapsPlaceholder properties={properties} />
+      <OpenStreetMapView properties={properties} />
     </div>
   );
 }
