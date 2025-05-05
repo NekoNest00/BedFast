@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -5,8 +6,9 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+// Set a very small limit and very short display time
+const TOAST_LIMIT = 0  // Setting to 0 to disable automatic toasts
+const TOAST_REMOVE_DELAY = 1000  // Reduce to 1 second for any that do show
 
 type ToasterToast = ToastProps & {
   id: string
@@ -74,6 +76,10 @@ const addToRemoveQueue = (toastId: string) => {
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
+      // If TOAST_LIMIT is 0, don't add any toasts
+      if (TOAST_LIMIT <= 0) {
+        return state;
+      }
       return {
         ...state,
         toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
@@ -90,8 +96,8 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
+      // Side effects - This could be extracted into a dismissToast() action,
+      // but kept here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -139,32 +145,17 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+// Modified toast function to log to console instead of showing UI toast
 function toast({ ...props }: Toast) {
+  // Just log to console instead of displaying toast
+  console.log(`Toast: ${props.title || ''} - ${props.description || ''}`);
+  
   const id = genId()
-
-  const update = (props: ToasterToast) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
-
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss()
-      },
-    },
-  })
-
+  // Return the expected API but don't actually show toasts
   return {
-    id: id,
-    dismiss,
-    update,
+    id,
+    dismiss: () => {},
+    update: () => {},
   }
 }
 
