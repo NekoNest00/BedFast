@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Check, Clock, X } from "lucide-react";
 
 export type AccessStatus = "active" | "upcoming" | "expired";
 
@@ -12,32 +11,11 @@ interface StatusBadgeProps {
 export default function StatusBadge({ accessStatus }: StatusBadgeProps) {
   switch (accessStatus) {
     case "active":
-      return (
-        <Badge className="bg-brand-red hover:bg-brand-red/90 flex items-center justify-center gap-1 px-2 py-1 h-6 min-w-[80px] text-xs font-medium">
-          <Check size={12} />
-          <span>Active</span>
-        </Badge>
-      );
+      return <Badge className="bg-brand-red hover:bg-brand-red/90">Active</Badge>;
     case "upcoming":
-      return (
-        <Badge 
-          variant="outline" 
-          className="border-amber-500 text-amber-500 flex items-center justify-center gap-1 px-2 py-1 h-6 min-w-[80px] text-xs font-medium"
-        >
-          <Clock size={12} />
-          <span>Not Active Yet</span>
-        </Badge>
-      );
+      return <Badge variant="outline" className="border-brand-red text-brand-red">Not Yet Active</Badge>;
     case "expired":
-      return (
-        <Badge 
-          variant="outline" 
-          className="border-gray-400 text-gray-400 flex items-center justify-center gap-1 px-2 py-1 h-6 min-w-[80px] text-xs font-medium"
-        >
-          <X size={12} />
-          <span>Expired</span>
-        </Badge>
-      );
+      return <Badge variant="outline" className="border-gray-400 text-gray-400">Expired</Badge>;
     default:
       return null;
   }
