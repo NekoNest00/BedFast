@@ -1,26 +1,41 @@
 
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import BookingForm from "../components/BookingForm";
 import BookingConfirmation from "../components/BookingConfirmation";
 import { Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// New component imports
+// Component imports
 import PropertyImageCarousel from "../components/property/PropertyImageCarousel";
 import PropertyDetailsHeader from "../components/property/PropertyDetailsHeader";
 import PropertyDescription from "../components/property/PropertyDescription";
 import RecommendationCarousel from "../components/recommendations/RecommendationCarousel";
+import ViewingScheduler from "../components/viewings/ViewingScheduler";
 import { useRecommendations } from "../hooks/useRecommendations";
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const initialAction = searchParams.get('action');
+  
   const [isFavorite, setIsFavorite] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [generatedPin, setGeneratedPin] = useState("");
   const [bookingDates, setBookingDates] = useState<{start?: Date, end?: Date}>({});
+  const [activeTab, setActiveTab] = useState<"book" | "view">(initialAction === "view" ? "view" : "book");
   const { toast } = useToast();
+  
+  // Set initial tab based on search params when component mounts
+  useEffect(() => {
+    if (initialAction === "view") {
+      setActiveTab("view");
+    } else if (initialAction === "book") {
+      setActiveTab("book");
+    }
+  }, [initialAction]);
   
   // Fetch recommendations based on property ID
   const { recommendations, isLoading } = useRecommendations(id);
@@ -111,23 +126,44 @@ export default function PropertyDetails() {
             </div>
             
             <div className="mt-6 lg:mt-0">
-              {bookingComplete ? (
-                <BookingConfirmation 
-                  pin={generatedPin}
-                  propertyName={property.name}
-                  startDate={bookingDates.start}
-                  endDate={bookingDates.end}
-                />
-              ) : (
-                <BookingForm
-                  propertyId={property.id}
-                  propertyName={property.name}
-                  pricePerNight={property.price}
-                  onBookingComplete={(pin) => {
-                    handleBookingComplete(pin);
-                  }}
-                />
-              )}
+              <Tabs 
+                defaultValue={activeTab} 
+                value={activeTab} 
+                onValueChange={(value) => setActiveTab(value as "book" | "view")} 
+                className="w-full"
+              >
+                <TabsList className="grid grid-cols-2 w-full mb-4">
+                  <TabsTrigger value="book">Book Stay</TabsTrigger>
+                  <TabsTrigger value="view">Schedule Viewing</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="book">
+                  {bookingComplete ? (
+                    <BookingConfirmation 
+                      pin={generatedPin}
+                      propertyName={property.name}
+                      startDate={bookingDates.start}
+                      endDate={bookingDates.end}
+                    />
+                  ) : (
+                    <BookingForm
+                      propertyId={property.id}
+                      propertyName={property.name}
+                      pricePerNight={property.price}
+                      onBookingComplete={(pin) => {
+                        handleBookingComplete(pin);
+                      }}
+                    />
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="view">
+                  <ViewingScheduler 
+                    propertyId={property.id}
+                    propertyName={property.name}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
 
