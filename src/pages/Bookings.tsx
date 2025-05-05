@@ -9,9 +9,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import StatusBadge, { AccessStatus } from "../components/access/displays/StatusBadge";
 
 type BookingStatus = "upcoming" | "past";
-type AccessStatus = "active" | "upcoming" | "expired";
 
 interface Booking {
   id: string;
@@ -91,29 +91,6 @@ export default function Bookings() {
       return "expired";
     }
   };
-  
-  const renderAccessBadge = (accessStatus: AccessStatus) => {
-    switch (accessStatus) {
-      case "active":
-        return (
-          <Badge className="bg-green-500 hover:bg-green-600 flex items-center gap-1">
-            <Check size={12} /> Active
-          </Badge>
-        );
-      case "upcoming":
-        return (
-          <Badge variant="outline" className="border-amber-500 text-amber-500 flex items-center gap-1">
-            <Clock size={12} /> Not Active Yet
-          </Badge>
-        );
-      case "expired":
-        return (
-          <Badge variant="outline" className="border-gray-400 text-gray-400 flex items-center gap-1">
-            <X size={12} /> Expired
-          </Badge>
-        );
-    }
-  };
 
   if (!user) {
     return (
@@ -136,7 +113,7 @@ export default function Bookings() {
         <h1 className="text-2xl font-bold mb-6">Your Bookings</h1>
         
         <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as "upcoming" | "past")}>
-          <TabsList className="grid grid-cols-2 mb-8">
+          <TabsList className="grid grid-cols-2 mb-8 w-full">
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
             <TabsTrigger value="past">Past</TabsTrigger>
           </TabsList>
@@ -159,18 +136,18 @@ export default function Bookings() {
                       <CardContent className="p-4 flex-1 flex flex-col justify-between">
                         <div>
                           <div className="flex justify-between items-start mb-1">
-                            <h3 className="font-medium">{booking.propertyName}</h3>
-                            {renderAccessBadge(accessStatus)}
+                            <h3 className="font-medium line-clamp-1">{booking.propertyName}</h3>
+                            <StatusBadge accessStatus={accessStatus} />
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2">{booking.location}</p>
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-1">{booking.location}</p>
                           <div className="flex items-center text-sm text-muted-foreground">
-                            <CalendarDays size={14} className="mr-1" />
-                            <span>
+                            <CalendarDays size={14} className="mr-1 flex-shrink-0" />
+                            <span className="truncate">
                               {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center justify-between mt-4 gap-2">
                           {accessStatus === "active" && (
                             <Button 
                               variant="outline" 
@@ -230,11 +207,11 @@ export default function Bookings() {
                     </div>
                     <CardContent className="p-4 flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-medium">{booking.propertyName}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{booking.location}</p>
+                        <h3 className="font-medium line-clamp-1">{booking.propertyName}</h3>
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-1">{booking.location}</p>
                         <div className="flex items-center text-sm text-muted-foreground">
-                          <CalendarDays size={14} className="mr-1" />
-                          <span>
+                          <CalendarDays size={14} className="mr-1 flex-shrink-0" />
+                          <span className="truncate">
                             {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
                           </span>
                         </div>

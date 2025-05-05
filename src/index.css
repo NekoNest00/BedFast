@@ -77,10 +77,15 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Ensure consistent mobile container width */
+  .container-app {
+    @apply px-4 w-full max-w-lg mx-auto;
+  }
 }
 
+/* Constrain the app to mobile-friendly dimensions */
 .container-app {
-  @apply container max-w-6xl mx-auto px-4;
+  @apply px-4 w-full max-w-lg mx-auto;
 }
 
 /* Unified Button Styling */
@@ -110,6 +115,7 @@ button, .btn {
   @apply text-sm rounded-full;
 }
 
+/* Animations */
 @keyframes pulse-ring {
   0% {
     transform: scale(0.8);
@@ -145,6 +151,7 @@ button, .btn {
   animation: unlock 2s ease-in-out;
 }
 
+/* PIN input styling */
 .pin-digit {
   @apply w-10 h-12 rounded-lg flex items-center justify-center font-mono text-xl font-bold;
 }
@@ -157,12 +164,12 @@ button, .btn {
   cursor: pointer;
 }
 
-/* Bottom navigation styling */
+/* Bottom navigation styling - improved for mobile */
 .bottom-nav-item {
-  @apply flex flex-col items-center justify-center text-xs space-y-1 transition-colors duration-200 ease-in-out py-1 px-3 rounded-md;
+  @apply flex flex-col items-center justify-center text-xs space-y-1 transition-colors duration-200 ease-in-out py-1 px-2 rounded-md;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 380px) {
   .bottom-nav-item {
     @apply px-1;
   }
@@ -186,4 +193,15 @@ button, .btn {
 
 .animate-fade-in {
   animation: fade-in 0.2s ease-in-out forwards;
+}
+
+/* Fix for overlapping content with bottom navigation */
+main {
+  padding-bottom: 4rem;
+}
+
+/* Constrain the app to mobile-friendly dimensions */
+#root {
+  @apply max-w-lg mx-auto;
+  position: relative;
 }

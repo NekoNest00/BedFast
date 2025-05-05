@@ -19,12 +19,12 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen max-w-lg mx-auto">
       <main className="flex-1 pb-20">{children}</main>
       
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur-sm z-50">
-        <div className="container-app">
+        <div className="container-app max-w-lg mx-auto">
           <div className="flex items-center justify-around py-3">
             <Link 
               to="/" 
@@ -36,13 +36,13 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <Home size={22} />
-                  <span>Home</span>
+                  <Home size={20} />
+                  <span className="text-xs mt-1">Home</span>
                 </motion.div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <Home size={22} />
-                  <span>Home</span>
+                  <Home size={20} />
+                  <span className="text-xs mt-1">Home</span>
                 </div>
               )}
             </Link>
@@ -57,13 +57,13 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <CalendarDays size={22} />
-                  <span>Bookings</span>
+                  <CalendarDays size={20} />
+                  <span className="text-xs mt-1">Bookings</span>
                 </motion.div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <CalendarDays size={22} />
-                  <span>Bookings</span>
+                  <CalendarDays size={20} />
+                  <span className="text-xs mt-1">Bookings</span>
                 </div>
               )}
             </Link>
@@ -78,13 +78,13 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <Key size={22} />
-                  <span>Access</span>
+                  <Key size={20} />
+                  <span className="text-xs mt-1">Access</span>
                 </motion.div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <Key size={22} />
-                  <span>Access</span>
+                  <Key size={20} />
+                  <span className="text-xs mt-1">Access</span>
                 </div>
               )}
             </Link>
@@ -99,13 +99,13 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <Eye size={22} />
-                  <span>Viewings</span>
+                  <Eye size={20} />
+                  <span className="text-xs mt-1">Viewings</span>
                 </motion.div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <Eye size={22} />
-                  <span>Viewings</span>
+                  <Eye size={20} />
+                  <span className="text-xs mt-1">Viewings</span>
                 </div>
               )}
             </Link>
@@ -120,13 +120,13 @@ export default function Layout({ children }: LayoutProps) {
                   animate={{ scale: 1 }}
                   className="flex flex-col items-center"
                 >
-                  <User size={22} />
-                  <span>Profile</span>
+                  <User size={20} />
+                  <span className="text-xs mt-1">Profile</span>
                 </motion.div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <User size={22} />
-                  <span>Profile</span>
+                  <User size={20} />
+                  <span className="text-xs mt-1">Profile</span>
                 </div>
               )}
             </Link>

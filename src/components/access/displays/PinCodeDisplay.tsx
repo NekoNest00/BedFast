@@ -51,9 +51,9 @@ export default function PinCodeDisplay({ pin, shouldShow, accessStatus }: PinCod
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 px-2">
       <motion.div 
-        className="flex gap-2 justify-center"
+        className="flex gap-2 justify-center max-w-xs mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -61,7 +61,7 @@ export default function PinCodeDisplay({ pin, shouldShow, accessStatus }: PinCod
         {pin.split('').map((digit, i) => (
           <motion.div 
             key={i} 
-            className="w-11 h-14 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-mono text-xl font-bold"
+            className="w-10 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-mono text-xl font-bold flex-1"
             variants={itemVariants}
           >
             {digit}
