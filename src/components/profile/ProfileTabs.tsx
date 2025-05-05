@@ -5,8 +5,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import PersonalInfoTab from "./tabs/PersonalInfoTab";
 import PaymentMethodsTab from "./tabs/PaymentMethodsTab";
@@ -50,68 +48,40 @@ export default function ProfileTabs({
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
+  
+  const tabs = [
+    { id: "personal", label: "Personal Info" },
+    { id: "payment", label: "Payment Methods" },
+    { id: "notifications", label: "Notifications" },
+    { id: "help", label: "Help" },
+    { id: "settings", label: "Settings" },
+  ];
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <div className="relative mb-6">
-        <Carousel
-          opts={{
-            align: "start",
-            containScroll: "trimSnaps",
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-1">
-            <CarouselItem className="pl-1 basis-auto">
-              <TabsTrigger 
-                value="personal" 
-                className={`px-4 ${activeTab === "personal" ? "bg-background text-foreground shadow-sm" : ""}`}
-                onClick={() => handleTabChange("personal")}
-              >
-                Personal Info
-              </TabsTrigger>
-            </CarouselItem>
-            <CarouselItem className="pl-1 basis-auto">
-              <TabsTrigger 
-                value="payment" 
-                className={`px-4 ${activeTab === "payment" ? "bg-background text-foreground shadow-sm" : ""}`}
-                onClick={() => handleTabChange("payment")}
-              >
-                Payment Methods
-              </TabsTrigger>
-            </CarouselItem>
-            <CarouselItem className="pl-1 basis-auto">
-              <TabsTrigger 
-                value="notifications" 
-                className={`px-4 ${activeTab === "notifications" ? "bg-background text-foreground shadow-sm" : ""}`}
-                onClick={() => handleTabChange("notifications")}
-              >
-                Notifications
-              </TabsTrigger>
-            </CarouselItem>
-            <CarouselItem className="pl-1 basis-auto">
-              <TabsTrigger 
-                value="help" 
-                className={`px-4 ${activeTab === "help" ? "bg-background text-foreground shadow-sm" : ""}`}
-                onClick={() => handleTabChange("help")}
-              >
-                Help
-              </TabsTrigger>
-            </CarouselItem>
-            <CarouselItem className="pl-1 basis-auto">
-              <TabsTrigger 
-                value="settings" 
-                className={`px-4 ${activeTab === "settings" ? "bg-background text-foreground shadow-sm" : ""}`}
-                onClick={() => handleTabChange("settings")}
-              >
-                Settings
-              </TabsTrigger>
-            </CarouselItem>
-          </CarouselContent>
-          <div className="absolute -right-4 top-1/2 -translate-y-1/2">
-            <CarouselNext className="h-7 w-7 -translate-y-1/2" />
-          </div>
-        </Carousel>
+      <div className="relative mb-6 overflow-hidden">
+        <TabsList className="w-full flex overflow-x-auto hide-scrollbar">
+          <Carousel
+            opts={{
+              align: "start",
+              containScroll: "trimSnaps",
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-1">
+              {tabs.map((tab) => (
+                <CarouselItem key={tab.id} className="pl-1 basis-auto">
+                  <TabsTrigger 
+                    value={tab.id} 
+                    className={`px-4 ${activeTab === tab.id ? "bg-background text-foreground shadow-sm" : ""}`}
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        </TabsList>
       </div>
       
       <TabsContent value="personal">
