@@ -1,9 +1,8 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Heart, Share, MapPin, Star, Calendar } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Share, Heart } from "lucide-react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 interface PropertyDetailsHeaderProps {
   property: {
@@ -11,94 +10,101 @@ interface PropertyDetailsHeaderProps {
     location: string;
     rating: number;
     reviews: number;
-    accessType: string;
-    checkIn: string;
-    checkOut: string;
     hostName: string;
     hostImage: string;
+    instant: boolean;
   };
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onShare: () => void;
 }
 
-export default function PropertyDetailsHeader({
+const PropertyDetailsHeader = ({
   property,
   isFavorite,
   onToggleFavorite,
-  onShare,
-}: PropertyDetailsHeaderProps) {
+  onShare
+}: PropertyDetailsHeaderProps) => {
   return (
-    <>
-      <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
-        <Link
-          to="/"
-          className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
+    <div className="container-app pt-4">
+      <motion.div 
+        className="flex justify-between items-start"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div>
+          <motion.h1 
+            className="text-2xl font-semibold"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            {property.name}
+          </motion.h1>
+          
+          <motion.div 
+            className="flex items-center mt-1 space-x-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <span className="text-sm text-muted-foreground">{property.location}</span>
+          </motion.div>
+          
+          <motion.div 
+            className="flex items-center mt-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <span className="flex items-center">
+              <span className="text-sm font-medium">{property.rating}</span>
+              <span className="text-brand-red ml-1">★</span>
+            </span>
+            <span className="mx-1 text-muted-foreground">·</span>
+            <span className="text-sm text-muted-foreground">{property.reviews} reviews</span>
+            {property.instant && (
+              <>
+                <span className="mx-1 text-muted-foreground">·</span>
+                <span className="text-xs bg-brand-red/10 text-brand-red px-2 py-0.5 rounded-full">
+                  Instant Access
+                </span>
+              </>
+            )}
+          </motion.div>
+        </div>
+        
+        <motion.div 
+          className="flex space-x-2"
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
         >
-          <ArrowLeft size={20} className="text-foreground" />
-        </Link>
-        <div className="flex gap-2">
-          <button
-            onClick={onShare}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
-            aria-label="Share"
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={onShare} 
+            className="rounded-full"
           >
-            <Share size={20} className="text-foreground" />
-          </button>
-          <button
-            onClick={onToggleFavorite}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-background/90 shadow-md"
-            aria-label="Save to favorites"
-          >
-            <Heart size={20} className={isFavorite ? "text-red-500 fill-red-500" : "text-foreground"} />
-          </button>
-        </div>
-      </div>
-
-      <div className="py-2">
-        <h1 className="text-xl font-bold mb-1">{property.name}</h1>
-        <div className="flex items-center gap-2 text-sm">
-          <div className="flex items-center">
-            <Star size={16} className="text-amber-500 mr-1" />
-            <span>{property.rating}</span>
-            <span className="mx-1">·</span>
-            <span className="underline">{property.reviews} reviews</span>
-          </div>
-          <span className="mx-1">·</span>
-          <div className="flex items-center text-muted-foreground">
-            <MapPin size={14} className="mr-1" />
-            <span>{property.location}</span>
-          </div>
-        </div>
-
-        {/* Host info */}
-        <div className="flex items-center mt-3">
-          <Avatar className="h-8 w-8 mr-2 border-2 border-background">
-            <AvatarImage src={property.hostImage} alt={property.hostName} />
-            <AvatarFallback>{property.hostName.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <span className="text-sm">Hosted by {property.hostName}</span>
-        </div>
-
-        {/* Access Type Badge */}
-        <div className="mt-3">
-          <Badge variant="outline" className="bg-muted/50">
-            {property.accessType} Access
-          </Badge>
-        </div>
-
-        {/* Availability Info */}
-        <div className="mt-4 flex gap-3 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Calendar size={15} className="mr-1" />
-            <span>Check-in: {property.checkIn}</span>
-          </div>
-          <div className="flex items-center">
-            <Calendar size={15} className="mr-1" />
-            <span>Check-out: {property.checkOut}</span>
-          </div>
-        </div>
-      </div>
-    </>
+            <Share className="h-4 w-4" />
+          </Button>
+          <motion.div whileTap={{ scale: 0.9 }}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={onToggleFavorite}
+              className={`rounded-full ${isFavorite ? "text-brand-red" : ""}`}
+            >
+              <Heart 
+                className={`h-4 w-4 ${isFavorite ? "fill-brand-red" : ""}`} 
+              />
+            </Button>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </div>
   );
-}
+};
+
+export default PropertyDetailsHeader;

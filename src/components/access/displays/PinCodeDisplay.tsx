@@ -1,5 +1,6 @@
 
 import React from "react";
+import { motion } from "framer-motion";
 
 interface PinCodeDisplayProps {
   pin: string;
@@ -11,30 +12,70 @@ export default function PinCodeDisplay({ pin, shouldShow, accessStatus }: PinCod
   if (!shouldShow) {
     return (
       <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 text-center">
-        <p className="text-muted-foreground">
+        <motion.p 
+          className="text-muted-foreground"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           {accessStatus === "upcoming" ? 
             "Your PIN will be displayed when your access period begins" : 
             "Your access period has ended"}
-        </p>
+        </motion.p>
       </div>
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 15
+      }
+    }
+  };
+
   return (
     <div className="space-y-2">
-      <div className="flex gap-2 justify-center">
+      <motion.div 
+        className="flex gap-2 justify-center"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {pin.split('').map((digit, i) => (
-          <div 
+          <motion.div 
             key={i} 
             className="w-11 h-14 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-mono text-xl font-bold"
+            variants={itemVariants}
           >
             {digit}
-          </div>
+          </motion.div>
         ))}
-      </div>
-      <p className="text-center text-sm text-muted-foreground mt-2">
+      </motion.div>
+      <motion.p 
+        className="text-center text-sm text-muted-foreground mt-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+      >
         Use this PIN to unlock your door at the property
-      </p>
+      </motion.p>
     </div>
   );
 }

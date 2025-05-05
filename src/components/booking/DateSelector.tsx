@@ -1,17 +1,16 @@
 
 import React from "react";
-import { format } from "date-fns";
-import { CalendarDays } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface DateSelectorProps {
   startDate: Date | undefined;
@@ -28,53 +27,79 @@ export default function DateSelector({
   isOpen,
   setIsOpen,
   onDateSelect,
-  propertyName,
+  propertyName
 }: DateSelectorProps) {
-  return (
-    <>
-      <div 
-        className="border rounded-lg p-3 flex justify-between items-center cursor-pointer mb-4"
-        onClick={() => setIsOpen(true)}
-      >
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Dates</span>
-          <span className="text-sm text-muted-foreground">
-            {startDate && endDate
-              ? `${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d, yyyy')}`
-              : 'Select dates'}
-          </span>
-        </div>
-        <CalendarDays size={18} className="text-muted-foreground" />
-      </div>
+  const handleSelect = (date: Date | undefined) => {
+    if (!startDate || (startDate && endDate)) {
+      onDateSelect({ from: date as Date, to: undefined });
+    } else {
+      onDateSelect({ from: startDate, to: date as Date });
+    }
+  };
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Select your stay dates</DialogTitle>
-            <DialogDescription>
-              Choose check-in and check-out dates for your stay at {propertyName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            <Calendar
-              mode="range"
-              selected={{
-                from: startDate,
-                to: endDate,
-              }}
-              onSelect={onDateSelect}
-              disabled={{ before: new Date() }}
-              numberOfMonths={1}
-              className="pointer-events-auto"
-            />
+  return (
+    <div className="mb-4">
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-full justify-start text-left font-normal border rounded-xl h-auto py-3",
+              !startDate && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {startDate && endDate ? (
+              <div className="grid">
+                <span className="font-medium">
+                  {format(startDate, "MMM d, yyyy")} - {format(endDate, "MMM d, yyyy")}
+                </span>
+                <motion.span 
+                  className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <Clock className="h-3 w-3" />
+                  Check-in: 3:00 PM · Check-out: 11:00 AM
+                </motion.span>
+              </div>
+            ) : (
+              <span>Select check-in and check-out dates</span>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="range"
+            selected={{
+              from: startDate as Date,
+              to: endDate as Date,
+            }}
+            onSelect={(range) => {
+              if (range?.from) {
+                handleSelect(range.from);
+                if (range.to) {
+                  handleSelect(range.to);
+                }
+              }
+            }}
+            initialFocus
+            numberOfMonths={1}
+            disabled={(date) => date < new Date()}
+          />
+          <div className="p-3 border-t">
+            <div className="text-xs text-muted-foreground">
+              <div className="font-medium text-foreground mb-1">{propertyName}</div>
+              <div className="flex gap-2">
+                <span>Check-in: 3:00 PM</span>
+                <span>·</span>
+                <span>Check-out: 11:00 AM</span>
+              </div>
+            </div>
           </div>
-          <DialogFooter>
-            <Button onClick={() => startDate && endDate && setIsOpen(false)}>
-              Confirm Dates
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
