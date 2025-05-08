@@ -51,7 +51,7 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
       }
       
       await login(data.email, data.password);
-      navigate("/");
+      // Don't navigate here - AuthContext will handle navigation after successful login
     } catch (error) {
       // Error is handled in the AuthContext
       console.error("Login form error:", error);

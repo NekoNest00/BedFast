@@ -14,15 +14,15 @@ type AuthView = "login" | "signup" | "forgot-password" | "two-factor";
 const Auth = () => {
   const [view, setView] = useState<AuthView>("login");
   const [email, setEmail] = useState("");
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isLoading) {
       navigate("/");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

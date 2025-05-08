@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Session } from "@supabase/supabase-js";
 
 interface User {
   id: string;
@@ -13,6 +14,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -24,8 +26,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Helper function to clean up auth state
   const cleanupAuthState = () => {
@@ -48,18 +52,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
+      (event, currentSession) => {
+        if (event === 'SIGNED_IN' && currentSession?.user) {
           // Map Supabase user to our User format
           const mappedUser: User = {
-            id: session.user.id,
-            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || '',
-            email: session.user.email || '',
-            avatar: session.user.user_metadata?.avatar_url,
+            id: currentSession.user.id,
+            name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0] || '',
+            email: currentSession.user.email || '',
+            avatar: currentSession.user.user_metadata?.avatar_url,
           };
           setUser(mappedUser);
+          setSession(currentSession);
+
+          // Defer additional actions to avoid deadlocks
+          setTimeout(() => {
+            navigate('/');
+          }, 0);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          setSession(null);
+          navigate('/auth');
+        } else if (event === 'TOKEN_REFRESHED') {
+          setSession(currentSession);
         }
       }
     );
@@ -78,6 +92,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             avatar: data.session.user.user_metadata?.avatar_url,
           };
           setUser(mappedUser);
+          setSession(data.session);
+          console.log("User session restored:", data.session);
+        } else {
+          console.log("No session found during initialization");
         }
       } catch (error) {
         console.error("Error checking auth session:", error);
@@ -91,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   // Enhanced login function
   const login = async (email: string, password: string) => {
@@ -115,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       // Authentication was successful, map the user data
-      if (data.user) {
+      if (data.user && data.session) {
         const mappedUser: User = {
           id: data.user.id,
           name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
@@ -123,11 +141,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           avatar: data.user.user_metadata?.avatar_url,
         };
         setUser(mappedUser);
+        setSession(data.session);
 
         toast({
           title: "Login successful!",
           description: "Welcome back to BedFast",
         });
+
+        // Let the onAuthStateChange listener handle navigation
       }
     } catch (error: any) {
       console.error("Login failed:", error);
@@ -183,6 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           avatar: data.user.user_metadata?.avatar_url,
         };
         setUser(mappedUser);
+        setSession(data.session);
 
         toast({
           title: "Account created!",
@@ -228,12 +250,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Clear user state
       setUser(null);
+      setSession(null);
       
       // Display toast
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
       });
+
+      // Force page refresh to clear any lingering state
+      window.location.href = '/auth';
       
     } catch (error) {
       console.error("Logout failed:", error);
@@ -248,7 +274,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{ 
       user, 
-      isAuthenticated: !!user,
+      session,
+      isAuthenticated: !!session,
       isLoading,
       login, 
       logout,

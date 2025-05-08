@@ -17,15 +17,33 @@ import AccessDetails from "./pages/AccessDetails";
 import NotFound from "./pages/NotFound";
 import ViewingDetails from "./pages/ViewingDetails";
 import Access from "./pages/Access";
+import { useEffect, useState } from "react";
 
 // Protected route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   // Use the auth context to check if the user is authenticated
   const { isAuthenticated, isLoading } = useAuth();
+  const [checkingAuth, setCheckingAuth] = useState(true);
   
-  // While checking authentication status, show nothing
-  if (isLoading) {
-    return null;
+  useEffect(() => {
+    // Give a short delay to allow auth state to stabilize
+    const timer = setTimeout(() => {
+      setCheckingAuth(false);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // While checking authentication status, show loading state
+  if (isLoading || checkingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="rounded-full bg-zinc-200 dark:bg-zinc-700 h-16 w-16 mb-4"></div>
+          <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-24"></div>
+        </div>
+      </div>
+    );
   }
   
   // If not authenticated, redirect to auth page
@@ -80,20 +98,33 @@ const AppRoutes = () => {
   );
 };
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
+const AppWithAuth = () => {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppWithAuth />
+      </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
