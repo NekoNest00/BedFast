@@ -12,8 +12,11 @@ interface MapPlaceholderProps {
 export default function MapPlaceholder({ properties, onPropertyClick }: MapPlaceholderProps) {
   return (
     <div className="text-center space-y-4 relative z-10 p-8 max-w-lg">
-      <h3 className="text-xl font-medium">OpenStreetMap Integration</h3>
-      <p className="text-muted-foreground text-sm">Loading map or displaying fallback if the map couldn't be loaded.</p>
+      <div className="flex items-center justify-center mb-4">
+        <div className="animate-spin h-8 w-8 border-3 border-t-brand-red border-r-transparent border-b-brand-red border-l-transparent rounded-full"></div>
+      </div>
+      <h3 className="text-xl font-medium">Loading Map</h3>
+      <p className="text-muted-foreground text-sm">Initializing map and fetching property locations...</p>
       
       <motion.div 
         className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-8"

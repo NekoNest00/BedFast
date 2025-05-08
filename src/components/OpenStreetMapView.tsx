@@ -6,6 +6,7 @@ import { useGeolocation } from "../hooks/useGeolocation";
 import { useLeafletMap } from "../hooks/useLeafletMap";
 import LocationStatus from "./map/LocationStatus";
 import MapStyles from "./map/MapStyles";
+import MapPlaceholder from "./map/MapPlaceholder";
 
 interface OpenStreetMapViewProps {
   properties: Property[];
@@ -26,13 +27,6 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     navigate(`/property/${propertyId}`);
   };
 
-  // Add an effect to track when the map is loaded
-  useEffect(() => {
-    if (mapInstance) {
-      setMapLoaded(true);
-    }
-  }, [mapInstance]);
-
   return (
     <div className="relative w-full h-full bg-muted/30 rounded-xl overflow-hidden">
       {/* Status indicator */}
@@ -40,6 +34,13 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
       
       {/* Map container */}
       <div ref={mapRef} className="absolute inset-0 z-10 w-full h-full" />
+      
+      {/* Loading placeholder */}
+      {!mapLoaded && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+          <MapPlaceholder properties={properties} onPropertyClick={handlePropertyClick} />
+        </div>
+      )}
       
       {/* Custom styles */}
       <MapStyles />

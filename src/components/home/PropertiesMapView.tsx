@@ -2,7 +2,6 @@
 import React from "react";
 import { Property } from "../PropertyCard";
 import OpenStreetMapView from "../OpenStreetMapView";
-import MapStyles from "../map/MapStyles";
 
 interface PropertiesMapViewProps {
   properties: Property[];
@@ -11,7 +10,6 @@ interface PropertiesMapViewProps {
 export default function PropertiesMapView({ properties }: PropertiesMapViewProps) {
   return (
     <div className="h-[calc(100vh-240px)] mb-6 w-full relative">
-      <MapStyles />
       <OpenStreetMapView properties={properties} />
     </div>
   );
