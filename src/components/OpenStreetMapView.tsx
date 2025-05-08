@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from "react";
 import { Property } from "./PropertyCard";
 import { MapPin } from "lucide-react";
@@ -32,10 +31,10 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     // Initialize map if it doesn't exist
     if (!mapInstance.current) {
       // Default view of map (New York) if geolocation is not available yet
-      const defaultPosition = [40.7128, -74.006];
+      const defaultLatLng: L.LatLngTuple = [40.7128, -74.006];
       
       mapInstance.current = L.map(mapRef.current).setView(
-        position ? [position.lat, position.lng] : defaultPosition,
+        position ? [position.lat, position.lng] as L.LatLngTuple : defaultLatLng,
         13
       );
 
@@ -49,10 +48,10 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
 
     // Update map center when position changes
     if (position && mapInstance.current) {
-      mapInstance.current.setView([position.lat, position.lng], 13);
+      mapInstance.current.setView([position.lat, position.lng] as L.LatLngTuple, 13);
       
       // Add user location marker
-      const userMarker = L.marker([position.lat, position.lng], {
+      const userMarker = L.marker([position.lat, position.lng] as L.LatLngTuple, {
         icon: L.divIcon({
           className: 'user-location-marker',
           html: `<div class="bg-brand-red rounded-full w-4 h-4 border-2 border-white pulse-animation"></div>`,
@@ -88,7 +87,7 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
 
       // Create marker with custom icon
       if (mapInstance.current) {
-        const marker = L.marker([randomLat, randomLng], { icon: priceIcon })
+        const marker = L.marker([randomLat, randomLng] as L.LatLngTuple, { icon: priceIcon })
           .addTo(mapInstance.current)
           .bindPopup(`
             <div class="p-2">
@@ -187,7 +186,28 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     <div className="relative w-full h-full bg-muted/30 rounded-xl overflow-hidden flex flex-col items-center justify-center">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzNzM3MzciIGZpbGwtb3BhY2l0eT0iMC4wNyI+PHBhdGggZD0iTTM2IDM0djI2aDI0VjM0SDM2ek0wIDM0djI2aDI0VjM0SDB6TTM2IDBoLTJ2MjRoMjZWMEgzNnptLTEwIDB2MjRoMjRWMEgyNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10" />
       
-      {renderLocationStatus()}
+      {/* Location Status Indicator */}
+      {loading && (
+        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
+          <div className="animate-spin h-4 w-4 border-2 border-brand-red border-t-transparent rounded-full"></div>
+          <span className="text-xs">Locating you...</span>
+        </div>
+      )}
+      
+      {error && (
+        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
+          <div className="h-4 w-4 bg-red-500 rounded-full"></div>
+          <span className="text-xs">Location error</span>
+        </div>
+      )}
+      
+      {position && !loading && !error && (
+        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
+          <div className="h-4 w-4 bg-green-500 rounded-full"></div>
+          <span className="text-xs">Location found</span>
+        </div>
+      )}
+      
       <div ref={mapRef} className="absolute inset-0 z-10"></div>
       <div className="fallback-content absolute inset-0 flex items-center justify-center z-0">
         {renderPlaceholder()}

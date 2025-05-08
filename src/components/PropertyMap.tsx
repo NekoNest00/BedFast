@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -28,14 +27,14 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
     // Initialize map
     mapboxgl.accessToken = mapToken;
     
-    const defaultPosition = position ? 
+    const defaultPosition: [number, number] = position ? 
       [position.lng, position.lat] : 
       [-74.006, 40.7128]; // Default to New York if no position
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/light-v11",
-      center: defaultPosition as [number, number],
+      center: defaultPosition,
       zoom: 13,
     });
 
