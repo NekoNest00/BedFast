@@ -10,7 +10,7 @@ interface PropertiesMapViewProps {
 
 export default function PropertiesMapView({ properties }: PropertiesMapViewProps) {
   return (
-    <div className="h-[calc(100vh-240px)] mb-6">
+    <div className="h-[calc(100vh-240px)] mb-6 w-full relative">
       <MapStyles />
       <OpenStreetMapView properties={properties} />
     </div>
