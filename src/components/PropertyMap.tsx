@@ -4,10 +4,6 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Property } from "./PropertyCard";
 import { useNavigate } from "react-router-dom";
-import { useGeolocation } from "../hooks/useGeolocation";
-import { Button } from "./ui/button";
-import { MapPin, Navigation } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
 
 interface PropertyMapProps {
   properties: Property[];
@@ -18,31 +14,27 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [mapToken, setMapToken] = useState<string>(mapboxToken || "");
   const navigate = useNavigate();
-  
-  // Use our geolocation hook
-  const { 
-    location, 
-    loading: locationLoading, 
-    error: locationError,
-    permissionStatus,
-    requestGeolocation
-  } = useGeolocation({
-    enableHighAccuracy: true,
-    timeout: 5000,
-    maximumAge: 0
-  });
+
+  // Request user location
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation([position.coords.longitude, position.coords.latitude]);
+      },
+      (error) => {
+        console.error("Error getting user location:", error);
+        // Default to New York if location access is denied
+        setUserLocation([-74.006, 40.7128]);
+      }
+    );
+  }, []);
 
   // Initialize map when container and token are available
   useEffect(() => {
-    if (!mapContainer.current || !mapToken) return;
-
-    // Default to New York if user location isn't available
-    const defaultLocation: [number, number] = [-74.006, 40.7128];
-    const userLocation: [number, number] = location 
-      ? [location.longitude, location.latitude]
-      : defaultLocation;
+    if (!mapContainer.current || !mapToken || !userLocation) return;
 
     // Initialize map
     mapboxgl.accessToken = mapToken;
@@ -60,23 +52,17 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
       "top-right"
     );
 
-    // Add user location marker if available
-    if (location) {
-      new mapboxgl.Marker({ 
-        color: "#3886F6",
-        scale: 0.8
-      })
+    // Add user location marker
+    new mapboxgl.Marker({ color: "#3886F6" })
       .setLngLat(userLocation)
       .addTo(map.current);
-    }
 
     // Add property markers
     markersRef.current = properties.map(property => {
-      // Create random locations near the user location or default location
-      const centerLng = userLocation[0];
-      const centerLat = userLocation[1];
-      const randomLng = centerLng + (Math.random() - 0.5) * 0.05;
-      const randomLat = centerLat + (Math.random() - 0.5) * 0.05;
+      // Create random locations near the user location for demo purposes
+      // In a real app, you would use actual property coordinates
+      const randomLng = userLocation[0] + (Math.random() - 0.5) * 0.05;
+      const randomLat = userLocation[1] + (Math.random() - 0.5) * 0.05;
       
       // Create popup
       const popup = new mapboxgl.Popup({ offset: 25 })
@@ -105,7 +91,7 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
 
       // Create and add marker
       const marker = new mapboxgl.Marker(el)
-        .setLngLat([randomLng, randomLat] as [number, number])
+        .setLngLat([randomLng, randomLat])
         .setPopup(popup)
         .addTo(map.current!);
       
@@ -121,16 +107,7 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
       markersRef.current.forEach(marker => marker.remove());
       map.current?.remove();
     };
-  }, [mapToken, location, properties, navigate]);
-
-  // Handle retry location
-  const handleRetryLocation = () => {
-    requestGeolocation();
-    toast({
-      title: "Requesting location",
-      description: "Please allow location access when prompted",
-    });
-  };
+  }, [mapToken, userLocation, properties, navigate]);
 
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden">
@@ -148,26 +125,6 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
           </p>
         </div>
       )}
-      
-      {/* Location permission UI overlay */}
-      {mapToken && permissionStatus === "denied" && (
-        <div className="absolute top-4 left-4 z-10 bg-background/90 p-3 rounded-lg shadow-md max-w-xs">
-          <div className="flex items-center gap-2 mb-2">
-            <MapPin className="text-brand-red" size={18} />
-            <h4 className="font-medium text-sm">Location access required</h4>
-          </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            Enable location services to see properties near you and get accurate directions.
-          </p>
-          <Button 
-            size="sm" 
-            className="text-xs w-full"
-            onClick={handleRetryLocation}>
-            <Navigation className="mr-2 h-3 w-3" /> Request Access
-          </Button>
-        </div>
-      )}
-      
       <div ref={mapContainer} className="h-full w-full" />
     </div>
   );

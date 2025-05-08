@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { User, Eye, EyeOff, Loader, Mail, KeyRound } from "lucide-react";
+import { User, Eye, EyeOff, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,12 +25,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface LoginFormProps {
-  onForgotPassword: () => void;
-  setEmail?: (email: string) => void;
-}
-
-const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
+const LoginForm = ({ onForgotPassword }: { onForgotPassword: () => void }) => {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -46,15 +41,19 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      if (setEmail) {
-        setEmail(data.email);
-      }
-      
       await login(data.email, data.password);
-      // Don't navigate here - AuthContext will handle navigation after successful login
+      toast({
+        title: "Login successful!",
+        description: "Welcome back to BedFast",
+      });
+      navigate("/");
     } catch (error) {
-      // Error is handled in the AuthContext
-      console.error("Login form error:", error);
+      console.error("Login error:", error);
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "Please check your credentials and try again",
+      });
     }
   };
 
@@ -73,9 +72,8 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
                     placeholder="mail@example.com"
                     {...field}
                     className="pl-10"
-                    autoComplete="email"
                   />
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </FormControl>
               <FormMessage />
@@ -104,9 +102,8 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
                     type={showPassword ? "text" : "password"}
                     {...field}
                     className="pl-10 pr-10"
-                    autoComplete="current-password"
                   />
-                  <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -129,7 +126,7 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
           {isLoading ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
-              Signing in...
+              Logging in...
             </>
           ) : (
             "Sign In"

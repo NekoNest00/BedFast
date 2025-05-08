@@ -1,28 +1,16 @@
 
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import LoginForm from "@/components/auth/LoginForm";
-import SignUpForm from "@/components/auth/SignUpForm";
 import OAuthButtons from "@/components/auth/OAuthButtons";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import TwoFactorAuth from "@/components/auth/TwoFactorAuth";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/context/AuthContext";
 
-type AuthView = "login" | "signup" | "forgot-password" | "two-factor";
+type AuthView = "login" | "forgot-password" | "two-factor";
 
 const Auth = () => {
   const [view, setView] = useState<AuthView>("login");
   const [email, setEmail] = useState("");
-  const { isAuthenticated, isLoading } = useAuth();
-  const navigate = useNavigate();
-  
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate("/");
-    }
-  }, [isAuthenticated, isLoading, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -58,7 +46,6 @@ const Auth = () => {
               transition={{ delay: 0.2, duration: 0.5 }}
             >
               {view === "login" && "Sign in to your account"}
-              {view === "signup" && "Create a new account"}
               {view === "forgot-password" && "Reset your password"}
               {view === "two-factor" && "Verify your identity"}
             </motion.p>
@@ -77,15 +64,7 @@ const Auth = () => {
                   <OAuthButtons />
                   <LoginForm 
                     onForgotPassword={() => setView("forgot-password")} 
-                    setEmail={setEmail}
                   />
-                </div>
-              )}
-
-              {view === "signup" && (
-                <div className="space-y-6">
-                  <OAuthButtons />
-                  <SignUpForm />
                 </div>
               )}
 
@@ -99,7 +78,7 @@ const Auth = () => {
                   onBack={() => setView("login")}
                   onComplete={() => {
                     // Redirect to home page or wherever needed
-                    navigate("/");
+                    console.log("2FA verified!");
                   }} 
                 />
               )}
@@ -108,31 +87,16 @@ const Auth = () => {
         </div>
       </div>
 
-      <div className="p-6 text-center">
-        {view === "login" && (
+      {view === "login" && (
+        <div className="p-6 text-center">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <button 
-              onClick={() => setView("signup")} 
-              className="text-brand-teal hover:underline"
-            >
+            <a href="#" className="text-brand-teal hover:underline">
               Create one
-            </button>
+            </a>
           </p>
-        )}
-        
-        {view === "signup" && (
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <button 
-              onClick={() => setView("login")} 
-              className="text-brand-teal hover:underline"
-            >
-              Sign in
-            </button>
-          </p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
