@@ -1,14 +1,9 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { SheetClose } from "@/components/ui/sheet";
 import { addHours } from "date-fns";
-import GuestNameForm from "./GuestNameForm";
-import AccessDurationSlider from "../forms/AccessDurationSlider";
-import GuestPinDisplay from "./GuestPinDisplay";
-import GuestAccessLog from "./GuestAccessLog";
-import GuestPinActions from "./GuestPinActions";
+import GuestAccessFormSection from "./GuestAccessFormSection";
+import GuestAccessResultsSection from "./GuestAccessResultsSection";
 
 interface GuestAccessFormProps {
   propertyName: string;
@@ -145,7 +140,7 @@ export default function GuestAccessForm({
   return (
     <div className="py-4 space-y-6">
       {!generatedPin ? (
-        <FormSection 
+        <GuestAccessFormSection 
           guestName={guestName}
           setGuestName={setGuestName}
           guestEmail={guestEmail}
@@ -164,7 +159,7 @@ export default function GuestAccessForm({
           onSubmit={generateGuestPin}
         />
       ) : (
-        <ResultsSection
+        <GuestAccessResultsSection
           guestName={guestName}
           generatedPin={generatedPin}
           propertyName={propertyName}
@@ -179,131 +174,3 @@ export default function GuestAccessForm({
     </div>
   );
 }
-
-// Form Section Component
-interface FormSectionProps {
-  guestName: string;
-  setGuestName: (name: string) => void;
-  guestEmail: string;
-  setGuestEmail: (email: string) => void;
-  guestPhone: string;
-  setGuestPhone: (phone: string) => void;
-  contactMethod: "email" | "sms";
-  setContactMethod: (method: "email" | "sms") => void;
-  accessHours: number;
-  setAccessHours: (hours: number) => void;
-  maxHours: number;
-  propertyName: string;
-  startDate: Date;
-  endDate: Date;
-  isGenerating: boolean;
-  onSubmit: (e: React.FormEvent) => void;
-}
-
-function FormSection({
-  guestName,
-  setGuestName,
-  guestEmail,
-  setGuestEmail,
-  guestPhone,
-  setGuestPhone,
-  contactMethod,
-  setContactMethod,
-  accessHours,
-  setAccessHours,
-  maxHours,
-  propertyName,
-  startDate,
-  endDate,
-  isGenerating,
-  onSubmit
-}: FormSectionProps) {
-  return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="mb-4">
-        <p className="text-sm text-muted-foreground mb-2">
-          Create temporary access for guests during your stay at {propertyName}.
-          Guest access is limited to your booking period from {startDate.toLocaleDateString()} to {endDate.toLocaleDateString()}.
-        </p>
-      </div>
-      
-      <GuestNameForm
-        guestName={guestName}
-        setGuestName={setGuestName}
-        guestEmail={guestEmail}
-        setGuestEmail={setGuestEmail}
-        guestPhone={guestPhone}
-        setGuestPhone={setGuestPhone}
-        contactMethod={contactMethod}
-        setContactMethod={setContactMethod}
-      />
-      
-      <AccessDurationSlider
-        accessHours={accessHours}
-        setAccessHours={setAccessHours}
-        maxHours={maxHours}
-      />
-      
-      <Button 
-        type="submit" 
-        className="w-full"
-        disabled={isGenerating}
-      >
-        {isGenerating ? "Generating..." : "Generate Guest PIN"}
-      </Button>
-    </form>
-  );
-}
-
-// Results Section Component
-interface ResultsSectionProps {
-  guestName: string;
-  generatedPin: string;
-  propertyName: string;
-  accessEndTime: Date;
-  accessLog: {time: Date, action: string}[];
-  contactMethod: "email" | "sms";
-  copyPinToClipboard: () => void;
-  shareWithGuest: () => void;
-  revokeAccess: () => void;
-}
-
-function ResultsSection({
-  guestName,
-  generatedPin,
-  propertyName,
-  accessEndTime,
-  accessLog,
-  contactMethod,
-  copyPinToClipboard,
-  shareWithGuest,
-  revokeAccess
-}: ResultsSectionProps) {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h4 className="font-medium mb-2">Guest Access Created</h4>
-        <p className="text-sm text-muted-foreground">
-          Access PIN for {guestName} has been generated
-        </p>
-      </div>
-      
-      <GuestPinDisplay
-        pin={generatedPin}
-        propertyName={propertyName}
-        startDate={new Date()}
-        endDate={accessEndTime}
-      />
-      
-      <GuestPinActions
-        copyPinToClipboard={copyPinToClipboard}
-        shareWithGuest={shareWithGuest}
-        revokeAccess={revokeAccess}
-        contactMethod={contactMethod}
-      />
-      
-      <GuestAccessLog accessLog={accessLog} />
-    </div>
-  );
-}
-
