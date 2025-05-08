@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import { Property } from "./PropertyCard";
 import { MapPin } from "lucide-react";
@@ -50,14 +51,34 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     if (position && mapInstance.current) {
       mapInstance.current.setView([position.lat, position.lng] as L.LatLngTuple, 13);
       
-      // Add user location marker
+      // Remove previous user location markers
+      markersRef.current = markersRef.current.filter(marker => {
+        if (marker.options.icon && marker.options.icon.options.className === 'user-location-marker') {
+          marker.remove();
+          return false;
+        }
+        return true;
+      });
+      
+      // Add user location marker with a distinct pin style
+      const userLocationPin = L.divIcon({
+        className: 'user-location-marker',
+        html: `
+          <div class="flex flex-col items-center">
+            <div class="map-pin-pulse w-6 h-6 rounded-full bg-blue-500/20 animate-ping"></div>
+            <div class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center">
+              <div class="h-4 w-4 rounded-full bg-blue-500 border-2 border-white shadow-md"></div>
+            </div>
+            <div class="mt-1 px-2 py-1 bg-background text-xs font-medium rounded-full shadow-md border border-border">You</div>
+          </div>
+        `,
+        iconSize: [32, 48],
+        iconAnchor: [16, 32],
+      });
+
       const userMarker = L.marker([position.lat, position.lng] as L.LatLngTuple, {
-        icon: L.divIcon({
-          className: 'user-location-marker',
-          html: `<div class="bg-brand-red rounded-full w-4 h-4 border-2 border-white pulse-animation"></div>`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
-        })
+        icon: userLocationPin,
+        zIndexOffset: 1000 // Make sure user pin is above all other pins
       }).addTo(mapInstance.current);
 
       // Add to markers array for cleanup
@@ -65,8 +86,13 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     }
 
     // Clear any existing property markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
+    markersRef.current = markersRef.current.filter(marker => {
+      if (marker.options.icon && marker.options.icon.options.className === 'custom-price-marker') {
+        marker.remove();
+        return false;
+      }
+      return true;
+    });
 
     // Add property markers
     properties.forEach((property) => {
@@ -186,27 +212,7 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     <div className="relative w-full h-full bg-muted/30 rounded-xl overflow-hidden flex flex-col items-center justify-center">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzNzM3MzciIGZpbGwtb3BhY2l0eT0iMC4wNyI+PHBhdGggZD0iTTM2IDM0djI2aDI0VjM0SDM2ek0wIDM0djI2aDI0VjM0SDB6TTM2IDBoLTJ2MjRoMjZWMEgzNnptLTEwIDB2MjRoMjRWMEgyNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10" />
       
-      {/* Location Status Indicator */}
-      {loading && (
-        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
-          <div className="animate-spin h-4 w-4 border-2 border-brand-red border-t-transparent rounded-full"></div>
-          <span className="text-xs">Locating you...</span>
-        </div>
-      )}
-      
-      {error && (
-        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
-          <div className="h-4 w-4 bg-red-500 rounded-full"></div>
-          <span className="text-xs">Location error</span>
-        </div>
-      )}
-      
-      {position && !loading && !error && (
-        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
-          <div className="h-4 w-4 bg-green-500 rounded-full"></div>
-          <span className="text-xs">Location found</span>
-        </div>
-      )}
+      {renderLocationStatus()}
       
       <div ref={mapRef} className="absolute inset-0 z-10"></div>
       <div className="fallback-content absolute inset-0 flex items-center justify-center z-0">
@@ -228,23 +234,20 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
           background: transparent;
           border: none;
         }
-        .pulse-animation {
-          animation: pulse 1.5s infinite;
+        .map-pin-pulse {
+          animation: map-pin-pulse 2s cubic-bezier(0, 0, 0.2, 1) infinite;
         }
-        @keyframes pulse {
+        @keyframes map-pin-pulse {
           0% {
-            transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(224, 30, 90, 0.7);
+            transform: scale(0.8);
+            opacity: 0.6;
           }
-          
-          70% {
-            transform: scale(1);
-            box-shadow: 0 0 0 10px rgba(224, 30, 90, 0);
+          50% {
+            opacity: 0.2;
           }
-          
           100% {
-            transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(224, 30, 90, 0);
+            transform: scale(1.5);
+            opacity: 0;
           }
         }
         `}

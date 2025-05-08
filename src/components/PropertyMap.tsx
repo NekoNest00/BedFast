@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -47,7 +48,80 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
     // Add user location marker if available
     if (position) {
       console.info("Adding user location marker");
-      new mapboxgl.Marker({ color: "#3886F6" })
+      
+      // Create custom pin HTML
+      const userPinElement = document.createElement('div');
+      userPinElement.className = 'user-location-pin';
+      userPinElement.innerHTML = `
+        <div class="pin-container">
+          <div class="pin-pulse"></div>
+          <div class="pin-dot"></div>
+          <div class="pin-label">You are here</div>
+        </div>
+      `;
+
+      // Add custom styles to the pin
+      const style = document.createElement('style');
+      style.textContent = `
+        .user-location-pin {
+          width: 32px;
+          height: 40px;
+        }
+        .pin-container {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .pin-pulse {
+          width: 24px;
+          height: 24px;
+          background-color: rgba(56, 134, 246, 0.3);
+          border-radius: 50%;
+          position: absolute;
+          top: 0;
+          animation: pulse 2s infinite;
+        }
+        .pin-dot {
+          width: 16px;
+          height: 16px;
+          background-color: #3886F6;
+          border: 2px solid white;
+          border-radius: 50%;
+          position: absolute;
+          top: 4px;
+          left: 8px;
+          box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+        }
+        .pin-label {
+          margin-top: 24px;
+          background-color: white;
+          padding: 2px 6px;
+          border-radius: 10px;
+          font-size: 10px;
+          font-weight: bold;
+          white-space: nowrap;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes pulse {
+          0% {
+            transform: scale(0.8);
+            opacity: 0.9;
+          }
+          70% {
+            transform: scale(1.5);
+            opacity: 0.2;
+          }
+          100% {
+            transform: scale(1.8);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Add user location marker with the custom element
+      new mapboxgl.Marker(userPinElement)
         .setLngLat([position.lng, position.lat])
         .addTo(map.current);
     }
