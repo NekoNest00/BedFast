@@ -21,6 +21,9 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
   });
 
   useEffect(() => {
+    let isMounted = true;
+    let permissionStatusWatcher: PermissionStatus | null = null;
+
     // Check if geolocation is available in the browser
     if (!('geolocation' in navigator)) {
       setState(prev => ({
@@ -31,17 +34,113 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
       return;
     }
 
+    // Function to handle successful position
+    const handleSuccess = (position: GeolocationPosition) => {
+      if (!isMounted) return;
+
+      console.log('Geolocation success:', position.coords);
+      
+      setState({
+        coords: {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        },
+        error: null,
+        loading: false,
+        permissionState: 'granted'
+      });
+      
+      toast({
+        title: 'Location detected',
+        description: 'Showing properties near you'
+      });
+    };
+
+    // Function to handle position error
+    const handleError = (error: GeolocationPositionError) => {
+      if (!isMounted) return;
+      
+      console.log('Geolocation error:', error.message, error.code);
+      
+      setState(prev => ({
+        ...prev,
+        error: error.message,
+        loading: false,
+        permissionState: error.code === error.PERMISSION_DENIED ? 'denied' : prev.permissionState
+      }));
+      
+      if (error.code === error.PERMISSION_DENIED) {
+        toast({
+          title: 'Location access denied',
+          description: 'Enable location in your browser settings to see nearby properties',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Location error',
+          description: `Couldn't determine your location: ${error.message}`,
+          variant: 'destructive'
+        });
+      }
+    };
+
+    // Function to get location
+    const getLocation = () => {
+      setState(prev => ({ ...prev, loading: true }));
+      
+      // Use a timeout to prevent infinite loading state
+      const timeoutId = setTimeout(() => {
+        if (isMounted && state.loading) {
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            error: 'Location request timed out'
+          }));
+          
+          toast({
+            title: 'Location request timed out',
+            description: 'Please try again later',
+            variant: 'destructive'
+          });
+        }
+      }, options?.timeout || 10000);
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          clearTimeout(timeoutId);
+          handleSuccess(position);
+        },
+        (error) => {
+          clearTimeout(timeoutId);
+          handleError(error);
+        },
+        {
+          ...options,
+          timeout: options?.timeout || 5000
+        }
+      );
+    };
+
     // Check for permissions API support
     if ('permissions' in navigator) {
       navigator.permissions.query({ name: 'geolocation' as PermissionName })
         .then(permissionStatus => {
+          if (!isMounted) return;
+          
+          console.log('Permission state:', permissionStatus.state);
+          
           setState(prev => ({
             ...prev,
             permissionState: permissionStatus.state
           }));
 
           // Listen for changes to permission state
+          permissionStatusWatcher = permissionStatus;
           permissionStatus.onchange = () => {
+            if (!isMounted) return;
+            
+            console.log('Permission state changed:', permissionStatus.state);
+            
             setState(prev => ({
               ...prev,
               permissionState: permissionStatus.state
@@ -50,6 +149,12 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
             // If permission becomes granted, get location
             if (permissionStatus.state === 'granted') {
               getLocation();
+            } else if (permissionStatus.state === 'denied') {
+              setState(prev => ({
+                ...prev,
+                error: 'Location permission denied',
+                loading: false
+              }));
             }
           };
 
@@ -65,6 +170,7 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
               error: 'Location permission denied',
               loading: false
             }));
+            
             toast({
               title: 'Location access denied',
               description: 'Enable location in your browser settings to see nearby properties',
@@ -82,54 +188,12 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
       getLocation();
     }
 
-    function getLocation() {
-      setState(prev => ({ ...prev, loading: true }));
-      
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setState({
-            coords: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            },
-            error: null,
-            loading: false,
-            permissionState: 'granted'
-          });
-          
-          toast({
-            title: 'Location detected',
-            description: 'Showing properties near you'
-          });
-        },
-        (error) => {
-          setState(prev => ({
-            ...prev,
-            error: error.message,
-            loading: false
-          }));
-          
-          if (error.code === error.PERMISSION_DENIED) {
-            toast({
-              title: 'Location access denied',
-              description: 'Enable location in your browser settings to see nearby properties',
-              variant: 'destructive'
-            });
-          } else {
-            toast({
-              title: 'Location error',
-              description: `Couldn't determine your location: ${error.message}`,
-              variant: 'destructive'
-            });
-          }
-        },
-        options
-      );
-    }
-
     // Cleanup function
     return () => {
-      // Any cleanup if needed
+      isMounted = false;
+      if (permissionStatusWatcher) {
+        permissionStatusWatcher.onchange = null;
+      }
     };
   }, [options]);
 
