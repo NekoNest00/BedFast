@@ -20,6 +20,7 @@ export function MapStyles() {
       }
       .pulse-animation {
         animation: pulse 2s infinite;
+        box-shadow: 0 0 0 rgba(59, 130, 246, 0.7);
       }
       @keyframes pulse {
         0% {
@@ -34,6 +35,10 @@ export function MapStyles() {
           transform: scale(0.95);
           box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
         }
+      }
+      .leaflet-div-icon {
+        background: transparent;
+        border: none;
       }
       `}
     </style>

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 export interface GeolocationState {
@@ -19,9 +19,20 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
     loading: true,
     permissionState: null
   });
+  
+  const timeoutRef = useRef<number | null>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    let isMounted = true;
+    // Set mounted flag
+    isMounted.current = true;
+    
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+    }
+    
+    let watchId: number | null = null;
     let permissionStatusWatcher: PermissionStatus | null = null;
 
     // Check if geolocation is available in the browser
@@ -36,7 +47,7 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
 
     // Function to handle successful position
     const handleSuccess = (position: GeolocationPosition) => {
-      if (!isMounted) return;
+      if (!isMounted.current) return;
 
       console.log('Geolocation success:', position.coords);
       
@@ -54,11 +65,17 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
         title: 'Location detected',
         description: 'Showing properties near you'
       });
+      
+      // Clear the timeout since we got a successful result
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
 
     // Function to handle position error
     const handleError = (error: GeolocationPositionError) => {
-      if (!isMounted) return;
+      if (!isMounted.current) return;
       
       console.log('Geolocation error:', error.message, error.code);
       
@@ -82,15 +99,21 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
           variant: 'destructive'
         });
       }
+      
+      // Clear the timeout since we got an error result
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
 
     // Function to get location
     const getLocation = () => {
       setState(prev => ({ ...prev, loading: true }));
       
-      // Use a timeout to prevent infinite loading state
-      const timeoutId = setTimeout(() => {
-        if (isMounted && state.loading) {
+      // Set a timeout to prevent infinite loading state
+      timeoutRef.current = window.setTimeout(() => {
+        if (isMounted.current) {
           setState(prev => ({
             ...prev,
             loading: false,
@@ -105,18 +128,14 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
         }
       }, options?.timeout || 10000);
       
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          clearTimeout(timeoutId);
-          handleSuccess(position);
-        },
-        (error) => {
-          clearTimeout(timeoutId);
-          handleError(error);
-        },
+      // Start watching position
+      watchId = navigator.geolocation.watchPosition(
+        handleSuccess,
+        handleError,
         {
-          ...options,
-          timeout: options?.timeout || 5000
+          enableHighAccuracy: options?.enableHighAccuracy || true,
+          timeout: options?.timeout || 5000,
+          maximumAge: options?.maximumAge || 0
         }
       );
     };
@@ -125,7 +144,7 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
     if ('permissions' in navigator) {
       navigator.permissions.query({ name: 'geolocation' as PermissionName })
         .then(permissionStatus => {
-          if (!isMounted) return;
+          if (!isMounted.current) return;
           
           console.log('Permission state:', permissionStatus.state);
           
@@ -137,7 +156,7 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
           // Listen for changes to permission state
           permissionStatusWatcher = permissionStatus;
           permissionStatus.onchange = () => {
-            if (!isMounted) return;
+            if (!isMounted.current) return;
             
             console.log('Permission state changed:', permissionStatus.state);
             
@@ -170,12 +189,6 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
               error: 'Location permission denied',
               loading: false
             }));
-            
-            toast({
-              title: 'Location access denied',
-              description: 'Enable location in your browser settings to see nearby properties',
-              variant: 'destructive'
-            });
           }
         })
         .catch(error => {
@@ -190,7 +203,16 @@ export function useGeolocation(options?: PositionOptions): GeolocationState {
 
     // Cleanup function
     return () => {
-      isMounted = false;
+      isMounted.current = false;
+      
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
+      
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+      
       if (permissionStatusWatcher) {
         permissionStatusWatcher.onchange = null;
       }

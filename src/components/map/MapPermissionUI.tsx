@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface MapPermissionUIProps {
@@ -39,6 +39,7 @@ export function MapPermissionUI({ permissionState, loading, coords, onRequestLoc
           className="w-full text-xs"
           onClick={onRequestLocation}
         >
+          <MapPin size={14} className="mr-1" />
           Enable location
         </Button>
       </div>
@@ -47,7 +48,7 @@ export function MapPermissionUI({ permissionState, loading, coords, onRequestLoc
   
   if (loading) {
     return (
-      <div className="absolute top-4 right-4 z-20 bg-white dark:bg-gray-900 p-2 rounded-lg shadow-md">
+      <div className="absolute top-16 right-4 z-20 bg-white dark:bg-gray-900 p-2 rounded-lg shadow-md">
         <div className="flex items-center gap-2">
           <Loader2 size={14} className="animate-spin text-muted-foreground" />
           <span className="text-xs">Getting location...</span>
