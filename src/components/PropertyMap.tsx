@@ -4,6 +4,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Property } from "./PropertyCard";
 import { useNavigate } from "react-router-dom";
+import { useGeolocation } from "../hooks/useGeolocation";
 
 interface PropertyMapProps {
   properties: Property[];
@@ -14,35 +15,27 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [mapToken, setMapToken] = useState<string>(mapboxToken || "");
   const navigate = useNavigate();
-
-  // Request user location
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation([position.coords.longitude, position.coords.latitude]);
-      },
-      (error) => {
-        console.error("Error getting user location:", error);
-        // Default to New York if location access is denied
-        setUserLocation([-74.006, 40.7128]);
-      }
-    );
-  }, []);
+  const { position, loading, error } = useGeolocation();
 
   // Initialize map when container and token are available
   useEffect(() => {
-    if (!mapContainer.current || !mapToken || !userLocation) return;
+    if (!mapContainer.current || !mapToken) return;
 
+    console.info("Initializing Mapbox map...");
+    
     // Initialize map
     mapboxgl.accessToken = mapToken;
+    
+    const defaultPosition = position ? 
+      [position.lng, position.lat] : 
+      [-74.006, 40.7128]; // Default to New York if no position
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/light-v11",
-      center: userLocation,
+      center: defaultPosition as [number, number],
       zoom: 13,
     });
 
@@ -52,17 +45,22 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
       "top-right"
     );
 
-    // Add user location marker
-    new mapboxgl.Marker({ color: "#3886F6" })
-      .setLngLat(userLocation)
-      .addTo(map.current);
+    // Add user location marker if available
+    if (position) {
+      console.info("Adding user location marker");
+      new mapboxgl.Marker({ color: "#3886F6" })
+        .setLngLat([position.lng, position.lat])
+        .addTo(map.current);
+    }
 
     // Add property markers
     markersRef.current = properties.map(property => {
-      // Create random locations near the user location for demo purposes
-      // In a real app, you would use actual property coordinates
-      const randomLng = userLocation[0] + (Math.random() - 0.5) * 0.05;
-      const randomLat = userLocation[1] + (Math.random() - 0.5) * 0.05;
+      // Create random locations near the user location or default location
+      const centerLng = position ? position.lng : -74.006;
+      const centerLat = position ? position.lat : 40.7128;
+      
+      const randomLng = centerLng + (Math.random() - 0.5) * 0.05;
+      const randomLat = centerLat + (Math.random() - 0.5) * 0.05;
       
       // Create popup
       const popup = new mapboxgl.Popup({ offset: 25 })
@@ -104,10 +102,11 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
     });
 
     return () => {
+      console.info("Cleaning up Mapbox map resources");
       markersRef.current.forEach(marker => marker.remove());
       map.current?.remove();
     };
-  }, [mapToken, userLocation, properties, navigate]);
+  }, [mapToken, position, properties, navigate]);
 
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden">
@@ -125,6 +124,31 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
           </p>
         </div>
       )}
+      
+      {/* Location Status Indicator */}
+      {mapToken && (
+        <div className="absolute top-4 left-4 z-20">
+          {loading && (
+            <div className="bg-background/80 px-3 py-2 rounded-full shadow-md flex items-center space-x-2">
+              <div className="animate-spin h-4 w-4 border-2 border-brand-red border-t-transparent rounded-full"></div>
+              <span className="text-xs">Locating...</span>
+            </div>
+          )}
+          {error && (
+            <div className="bg-background/80 px-3 py-2 rounded-full shadow-md flex items-center space-x-2">
+              <div className="h-4 w-4 bg-red-500 rounded-full"></div>
+              <span className="text-xs">Location error</span>
+            </div>
+          )}
+          {position && !loading && !error && (
+            <div className="bg-background/80 px-3 py-2 rounded-full shadow-md flex items-center space-x-2">
+              <div className="h-4 w-4 bg-green-500 rounded-full"></div>
+              <span className="text-xs">Location found</span>
+            </div>
+          )}
+        </div>
+      )}
+      
       <div ref={mapContainer} className="h-full w-full" />
     </div>
   );
