@@ -3,13 +3,14 @@ import React, { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Clock, Calendar as CalendarIcon } from "lucide-react";
+import { Clock, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { format, addDays, isPast, setHours, setMinutes, isToday } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 interface ViewingSlot {
   time: string;
@@ -25,10 +26,11 @@ export default function ViewingScheduler({ propertyId, propertyName }: ViewingSc
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(addDays(new Date(), 1));
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [isBooking, setIsBooking] = useState(false);
+  const [activeTab, setActiveTab] = useState<"calendar" | "time">("calendar");
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // In a real app, these would come from an API based on property availability
+  // Generate time slots for the selected date
   const generateTimeSlots = (date: Date | undefined): ViewingSlot[] => {
     if (!date) return [];
     
@@ -65,6 +67,11 @@ export default function ViewingScheduler({ propertyId, propertyName }: ViewingSc
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
     setSelectedSlot(null); // Reset selected slot when date changes
+    
+    // Move to time selection tab if we have a date
+    if (date) {
+      setActiveTab("time");
+    }
   };
   
   const handleSlotSelect = (time: string) => {
@@ -109,12 +116,13 @@ export default function ViewingScheduler({ propertyId, propertyName }: ViewingSc
   };
   
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <Card className="w-full overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-background to-muted/20">
         <CardTitle className="text-lg">Schedule a Viewing</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="calendar" className="w-full">
+      
+      <CardContent className="pt-6">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "calendar" | "time")} className="w-full">
           <TabsList className="grid grid-cols-2 mb-4">
             <TabsTrigger value="calendar">Select Date</TabsTrigger>
             <TabsTrigger value="time" disabled={!selectedDate}>Select Time</TabsTrigger>
@@ -125,7 +133,7 @@ export default function ViewingScheduler({ propertyId, propertyName }: ViewingSc
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
-                    variant={"outline"}
+                    variant="outline"
                     className={cn(
                       "justify-start text-left font-normal w-full",
                       !selectedDate && "text-muted-foreground"
@@ -142,7 +150,7 @@ export default function ViewingScheduler({ propertyId, propertyName }: ViewingSc
                     onSelect={handleDateChange}
                     disabled={(date) => isPast(date) || date > addDays(new Date(), 30)}
                     initialFocus
-                    className={cn("p-3 pointer-events-auto")}
+                    className="rounded-md border"
                   />
                 </PopoverContent>
               </Popover>
@@ -151,22 +159,34 @@ export default function ViewingScheduler({ propertyId, propertyName }: ViewingSc
           
           <TabsContent value="time">
             {timeSlots.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
+              <motion.div 
+                className="grid grid-cols-3 gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
                 {timeSlots.map((slot, index) => (
-                  <Button
+                  <motion.div
                     key={index}
-                    variant={selectedSlot === slot.time ? "default" : "outline"}
-                    disabled={!slot.available}
-                    onClick={() => handleSlotSelect(slot.time)}
-                    className={cn(
-                      "h-10",
-                      !slot.available && "opacity-50 cursor-not-allowed"
-                    )}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
                   >
-                    <Clock className="mr-1 h-3 w-3" /> {slot.time}
-                  </Button>
+                    <Button
+                      variant={selectedSlot === slot.time ? "default" : "outline"}
+                      disabled={!slot.available}
+                      onClick={() => handleSlotSelect(slot.time)}
+                      className={cn(
+                        "h-10 w-full",
+                        selectedSlot === slot.time ? "bg-brand-red hover:bg-brand-red/90" : "",
+                        !slot.available && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      <Clock className="mr-1 h-3 w-3" /> {slot.time}
+                    </Button>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             ) : (
               <p className="text-center text-muted-foreground py-4">
                 Please select a date to see available time slots
@@ -178,11 +198,18 @@ export default function ViewingScheduler({ propertyId, propertyName }: ViewingSc
       
       <CardFooter>
         <Button 
-          className="w-full"
+          className="w-full bg-brand-red hover:bg-brand-red/90"
           onClick={handleBookViewing}
           disabled={!selectedDate || !selectedSlot || isBooking}
         >
-          {isBooking ? "Scheduling..." : "Schedule Viewing"}
+          {isBooking ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Scheduling...
+            </>
+          ) : (
+            "Schedule Viewing"
+          )}
         </Button>
       </CardFooter>
     </Card>

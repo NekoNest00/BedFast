@@ -102,3 +102,40 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
 }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.4s ease-out forwards;
+}
+
+/* Glass morphism effects */
+.glass {
+  @apply bg-white/20 dark:bg-black/20 backdrop-blur-lg border border-white/10 dark:border-white/5 rounded-xl;
+}
+
+.glass-card {
+  @apply bg-white/70 dark:bg-black/50 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl shadow-sm;
+}
+
+/* Common layout utilities */
+.section-padding {
+  @apply py-8 md:py-12;
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-md hover:-translate-y-1;
+}

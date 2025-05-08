@@ -4,7 +4,6 @@ import { useParams, useSearchParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import BookingForm from "../components/BookingForm";
 import BookingConfirmation from "../components/BookingConfirmation";
-import { Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -40,7 +39,7 @@ export default function PropertyDetails() {
   // Fetch recommendations based on property ID
   const { recommendations, isLoading } = useRecommendations(id);
   
-  // Mock property details data
+  // Mock property details data - in a real app this would come from API
   const property = {
     id: id || "prop1",
     name: "Modern Downtown Apartment",
@@ -68,7 +67,7 @@ export default function PropertyDetails() {
     hostImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3",
   };
 
-  // Mock booking function
+  // Handle booking completion
   const handleBookingComplete = (pin: string) => {
     setGeneratedPin(pin);
     setBookingComplete(true);
@@ -78,6 +77,7 @@ export default function PropertyDetails() {
     });
   };
 
+  // Handle favorite toggle
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
     toast({
@@ -86,8 +86,8 @@ export default function PropertyDetails() {
     });
   };
 
+  // Handle share button click
   const handleShare = () => {
-    // In a real app, this would open a share dialog
     navigator.clipboard.writeText(window.location.href);
     toast({
       title: "Link copied",
@@ -95,22 +95,16 @@ export default function PropertyDetails() {
     });
   };
 
-  const handleScheduleViewing = () => {
-    toast({
-      title: "Viewing Scheduled",
-      description: "Check your email for confirmation details.",
-    });
-  };
-
   return (
     <Layout>
       <div className="relative pb-16">
-        {/* Property Images and Header with Action Buttons */}
+        {/* Property Images */}
         <PropertyImageCarousel 
           images={property.images} 
           propertyName={property.name} 
         />
 
+        {/* Property Header */}
         <PropertyDetailsHeader
           property={property}
           isFavorite={isFavorite}
@@ -121,10 +115,12 @@ export default function PropertyDetails() {
         {/* Property Details */}
         <div className="container-app">
           <div className="lg:grid lg:grid-cols-3 gap-6 mt-4">
+            {/* Left column - Property description */}
             <div className="lg:col-span-2">
               <PropertyDescription description={property.description} />
             </div>
             
+            {/* Right column - Booking/Viewing tabs */}
             <div className="mt-6 lg:mt-0">
               <Tabs 
                 defaultValue={activeTab} 

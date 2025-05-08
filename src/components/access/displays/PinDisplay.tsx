@@ -1,124 +1,105 @@
 
 import React from "react";
-import { format } from "date-fns";
-import { Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-
-export type PinDisplaySize = "sm" | "md" | "lg";
+import { Badge } from "@/components/ui/badge";
+import PinCodeDisplay from "./PinCodeDisplay";
+import AccessWindow from "./AccessWindow";
+import StatusBadge from "./StatusBadge";
+import PinMetadata from "./PinMetadata";
+import OfflineIndicator from "./OfflineIndicator";
 
 interface PinDisplayProps {
-  generatedPin: string;
-  accessEndTime: Date;
-  size?: PinDisplaySize;
+  pin: string;
+  accessStatus: "active" | "upcoming" | "expired";
+  propertyName: string;
+  startDate?: Date;
+  endDate?: Date;
+  isOffline?: boolean;
+  lastSyncTime?: Date;
   className?: string;
-  showLabel?: boolean;
-  showExpiry?: boolean;
 }
 
-export default function PinDisplay({ 
-  generatedPin, 
-  accessEndTime, 
-  size = "md", 
-  className,
-  showLabel = true,
-  showExpiry = true
+export default function PinDisplay({
+  pin,
+  accessStatus,
+  propertyName,
+  startDate,
+  endDate,
+  isOffline = false,
+  lastSyncTime,
+  className
 }: PinDisplayProps) {
-  // Size variants for pin digits
-  const sizeClasses = {
-    sm: {
-      container: "p-3",
-      digit: "w-7 h-9 text-base",
-      label: "text-xs mb-1",
-      expiry: "text-[10px]"
-    },
-    md: {
-      container: "p-4",
-      digit: "w-9 h-11 text-lg",
-      label: "text-sm mb-2",
-      expiry: "text-xs"
-    },
-    lg: {
-      container: "p-5",
-      digit: "w-11 h-14 text-xl",
-      label: "text-base mb-3",
-      expiry: "text-sm"
-    }
-  };
+  const pinIssueTime = new Date();
+  pinIssueTime.setHours(pinIssueTime.getHours() - 2); // Mock issue time (2 hours ago)
 
   // Animation variants
   const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
       transition: {
+        duration: 0.4,
         when: "beforeChildren",
         staggerChildren: 0.1
       }
     }
   };
 
-  const digitVariants = {
-    hidden: { y: 10, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20
-      }
-    }
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
-    <div className={cn(
-      "bg-gray-50 dark:bg-gray-800/50 rounded-lg text-center w-full",
-      sizeClasses[size].container,
-      className
-    )}>
-      {showLabel && (
-        <motion.p 
-          className={cn("text-muted-foreground", sizeClasses[size].label)}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          Guest PIN
-        </motion.p>
-      )}
-      <motion.div 
-        className="flex gap-2 justify-center mb-3 mx-auto"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {generatedPin.split('').map((digit, i) => (
-          <motion.div 
-            key={i} 
-            variants={digitVariants}
-            className={cn(
-              "rounded-md bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-mono font-bold flex-1",
-              sizeClasses[size].digit
-            )}
-          >
-            {digit}
-          </motion.div>
-        ))}
-      </motion.div>
-      {showExpiry && (
-        <motion.div 
-          className="flex items-center justify-center gap-1 text-muted-foreground"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.3 }}
-        >
-          <Clock className={cn("flex-shrink-0", size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3")} />
-          <p className={sizeClasses[size].expiry}>
-            Expires {format(accessEndTime, "MMM d, h:mm a")}
-          </p>
+    <motion.div 
+      className={cn("space-y-4", className)}
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      {/* Offline indicator */}
+      {isOffline && (
+        <motion.div variants={itemVariants}>
+          <OfflineIndicator isOffline={isOffline} lastSyncTime={lastSyncTime} />
         </motion.div>
       )}
-    </div>
+
+      <motion.div
+        className="bg-background rounded-xl border p-4 shadow-sm"
+        variants={itemVariants}
+      >
+        {/* Property name and status */}
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-medium">{propertyName}</h3>
+          <StatusBadge status={accessStatus} />
+        </div>
+
+        {/* Access window */}
+        <motion.div variants={itemVariants} className="mb-3">
+          <AccessWindow startDate={startDate} endDate={endDate} />
+        </motion.div>
+
+        {/* PIN code display */}
+        <motion.div 
+          variants={itemVariants}
+          className="my-4"
+        >
+          <PinCodeDisplay 
+            pin={pin} 
+            isActive={accessStatus === "active"} 
+          />
+        </motion.div>
+
+        {/* Pin metadata */}
+        <motion.div variants={itemVariants}>
+          <PinMetadata 
+            pinIssueTime={pinIssueTime} 
+            lastSyncTime={lastSyncTime} 
+          />
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
