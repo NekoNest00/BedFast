@@ -4,9 +4,6 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Property } from "./PropertyCard";
 import { useNavigate } from "react-router-dom";
-import useGeolocation from "@/hooks/useGeolocation";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 
 interface PropertyMapProps {
   properties: Property[];
@@ -17,29 +14,27 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [mapToken, setMapToken] = useState<string>(mapboxToken || "");
   const navigate = useNavigate();
-  
-  // Use the geolocation hook
-  const { coords, error, loading, permissionState } = useGeolocation({
-    enableHighAccuracy: true,
-    timeout: 5000,
-    maximumAge: 0
-  });
 
-  // Get user location or use default
-  const userLocation: [number, number] = coords 
-    ? [coords.longitude, coords.latitude] 
-    : [-74.006, 40.7128]; // Default to New York
-
-  const handleRequestLocation = () => {
-    // This will trigger the browser's permission prompt
-    navigator.geolocation.getCurrentPosition(() => {}, () => {});
-  };
+  // Request user location
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation([position.coords.longitude, position.coords.latitude]);
+      },
+      (error) => {
+        console.error("Error getting user location:", error);
+        // Default to New York if location access is denied
+        setUserLocation([-74.006, 40.7128]);
+      }
+    );
+  }, []);
 
   // Initialize map when container and token are available
   useEffect(() => {
-    if (!mapContainer.current || !mapToken) return;
+    if (!mapContainer.current || !mapToken || !userLocation) return;
 
     // Initialize map
     mapboxgl.accessToken = mapToken;
@@ -47,9 +42,8 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/light-v11",
-      center: userLocation as [number, number],
+      center: userLocation,
       zoom: 13,
-      language: 'en', // Set English as default language
     });
 
     // Add navigation controls
@@ -58,26 +52,15 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
       "top-right"
     );
 
-    // Add user location marker with pulsing effect
-    if (coords) {
-      const userLocationEl = document.createElement('div');
-      userLocationEl.className = 'user-location-dot';
-      userLocationEl.style.width = '16px';
-      userLocationEl.style.height = '16px';
-      userLocationEl.style.borderRadius = '50%';
-      userLocationEl.style.backgroundColor = '#3886F6';
-      userLocationEl.style.border = '3px solid white';
-      userLocationEl.style.boxShadow = '0 0 0 2px rgba(56, 134, 246, 0.3)';
-      userLocationEl.style.animation = 'pulse 1.5s infinite';
-
-      new mapboxgl.Marker({ element: userLocationEl })
-        .setLngLat(userLocation as [number, number])
-        .addTo(map.current);
-    }
+    // Add user location marker
+    new mapboxgl.Marker({ color: "#3886F6" })
+      .setLngLat(userLocation)
+      .addTo(map.current);
 
     // Add property markers
     markersRef.current = properties.map(property => {
-      // Create random locations near the user location
+      // Create random locations near the user location for demo purposes
+      // In a real app, you would use actual property coordinates
       const randomLng = userLocation[0] + (Math.random() - 0.5) * 0.05;
       const randomLat = userLocation[1] + (Math.random() - 0.5) * 0.05;
       
@@ -120,99 +103,11 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
       return marker;
     });
 
-    // Add language control
-    const languageControl = document.createElement('div');
-    languageControl.className = 'mapboxgl-ctrl mapboxgl-ctrl-group language-control';
-    languageControl.innerHTML = '<button class="mapboxgl-ctrl-language">EN</button>';
-    languageControl.style.margin = '10px';
-    languageControl.style.fontWeight = 'bold';
-    
-    const controlContainer = document.createElement('div');
-    controlContainer.className = 'mapboxgl-ctrl-top-left';
-    controlContainer.appendChild(languageControl);
-    
-    mapContainer.current.appendChild(controlContainer);
-
-    // Add map style
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(56, 134, 246, 0.7);
-        }
-        70% {
-          box-shadow: 0 0 0 10px rgba(56, 134, 246, 0);
-        }
-        100% {
-          box-shadow: 0 0 0 0 rgba(56, 134, 246, 0);
-        }
-      }
-      .language-control button {
-        padding: 5px 8px;
-        background: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-    `;
-    document.head.appendChild(style);
-
     return () => {
       markersRef.current.forEach(marker => marker.remove());
       map.current?.remove();
-      document.head.removeChild(style);
     };
-  }, [mapToken, userLocation, properties, navigate, coords]);
-
-  // Render location permission UI
-  const renderPermissionUI = () => {
-    if (permissionState === 'denied') {
-      return (
-        <div className="absolute bottom-20 left-4 z-10 bg-white dark:bg-gray-900 p-3 rounded-lg shadow-lg max-w-xs">
-          <h4 className="text-sm font-medium mb-1">Location access denied</h4>
-          <p className="text-xs text-muted-foreground mb-2">Enable location in your browser settings to see properties near you</p>
-          <Button 
-            size="sm" 
-            variant="default" 
-            className="w-full text-xs"
-            onClick={() => window.open('https://support.google.com/chrome/answer/142065', '_blank')}
-          >
-            How to enable location
-          </Button>
-        </div>
-      );
-    }
-    
-    if (!coords && !loading && permissionState !== 'granted') {
-      return (
-        <div className="absolute bottom-20 left-4 z-10 bg-white dark:bg-gray-900 p-3 rounded-lg shadow-lg max-w-xs">
-          <h4 className="text-sm font-medium mb-1">Location services</h4>
-          <p className="text-xs text-muted-foreground mb-2">Allow location access to see properties near you</p>
-          <Button 
-            size="sm" 
-            variant="default" 
-            className="w-full text-xs"
-            onClick={handleRequestLocation}
-          >
-            Enable location
-          </Button>
-        </div>
-      );
-    }
-    
-    if (loading) {
-      return (
-        <div className="absolute top-4 right-20 z-10 bg-white dark:bg-gray-900 p-2 rounded-lg shadow-md">
-          <div className="flex items-center gap-2">
-            <Loader2 size={14} className="animate-spin text-muted-foreground" />
-            <span className="text-xs">Getting location...</span>
-          </div>
-        </div>
-      );
-    }
-    
-    return null;
-  };
+  }, [mapToken, userLocation, properties, navigate]);
 
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden">
@@ -230,7 +125,6 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
           </p>
         </div>
       )}
-      {renderPermissionUI()}
       <div ref={mapContainer} className="h-full w-full" />
     </div>
   );
