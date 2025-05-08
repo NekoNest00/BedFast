@@ -13,54 +13,77 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-interface LoginFormProps {
-  onForgotPassword: () => void;
-  setEmail?: (email: string) => void;
-}
-
-const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
+const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading } = useAuth();
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { signup, isLoading } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
     try {
-      if (setEmail) {
-        setEmail(data.email);
-      }
-      
-      await login(data.email, data.password);
+      await signup(data.name, data.email, data.password);
       navigate("/");
     } catch (error) {
       // Error is handled in the AuthContext
-      console.error("Login form error:", error);
+      console.error("Signup form error:", error);
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    placeholder="John Doe"
+                    {...field}
+                    className="pl-10"
+                    autoComplete="name"
+                  />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <FormField
           control={form.control}
           name="email"
@@ -88,23 +111,14 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <div className="flex items-center justify-between">
-                <FormLabel>Password</FormLabel>
-                <button
-                  type="button"
-                  onClick={onForgotPassword}
-                  className="text-sm text-brand-teal hover:underline"
-                >
-                  Forgot password?
-                </button>
-              </div>
+              <FormLabel>Password</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
                     {...field}
                     className="pl-10 pr-10"
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                   />
                   <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <button
@@ -113,6 +127,42 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
                     {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+              </FormControl>
+              <FormDescription className="text-xs">
+                At least 8 characters with uppercase letters and numbers
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...field}
+                    className="pl-10 pr-10"
+                    autoComplete="new-password"
+                  />
+                  <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  >
+                    {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4 text-muted-foreground" />
                     ) : (
                       <Eye className="h-4 w-4 text-muted-foreground" />
@@ -129,10 +179,10 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
           {isLoading ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
-              Signing in...
+              Creating Account...
             </>
           ) : (
-            "Sign In"
+            "Create Account"
           )}
         </Button>
       </form>
@@ -140,4 +190,4 @@ const LoginForm = ({ onForgotPassword, setEmail }: LoginFormProps) => {
   );
 };
 
-export default LoginForm;
+export default SignUpForm;
