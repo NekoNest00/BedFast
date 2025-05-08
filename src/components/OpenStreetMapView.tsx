@@ -1,257 +1,44 @@
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Property } from "./PropertyCard";
-import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import L from "leaflet";
 import { useGeolocation } from "../hooks/useGeolocation";
+import { useLeafletMap } from "../hooks/useLeafletMap";
+import LocationStatus from "./map/LocationStatus";
+import MapPlaceholder from "./map/MapPlaceholder";
+import MapStyles from "./map/MapStyles";
 
-// Include Leaflet styles directly in the component
-// instead of importing the CSS file
 interface OpenStreetMapViewProps {
   properties: Property[];
 }
 
 export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps) {
   const navigate = useNavigate();
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
-  const { position, loading, error, permissionState } = useGeolocation();
+  const { position, loading, error } = useGeolocation();
+  const { mapRef } = useLeafletMap({ properties, position });
 
   const handlePropertyClick = (propertyId: string) => {
     navigate(`/property/${propertyId}`);
   };
 
-  useEffect(() => {
-    if (!mapRef.current) return;
-
-    console.info("Initializing map...");
-
-    // Initialize map if it doesn't exist
-    if (!mapInstance.current) {
-      // Default view of map (New York) if geolocation is not available yet
-      const defaultLatLng: L.LatLngTuple = [40.7128, -74.006];
-      
-      mapInstance.current = L.map(mapRef.current).setView(
-        position ? [position.lat, position.lng] as L.LatLngTuple : defaultLatLng,
-        13
-      );
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(mapInstance.current);
-      
-      console.info("Map initialized successfully");
-    }
-
-    // Update map center when position changes
-    if (position && mapInstance.current) {
-      mapInstance.current.setView([position.lat, position.lng] as L.LatLngTuple, 13);
-      
-      // Remove previous user location markers
-      markersRef.current = markersRef.current.filter(marker => {
-        if (marker.options.icon && marker.options.icon.options.className === 'user-location-marker') {
-          marker.remove();
-          return false;
-        }
-        return true;
-      });
-      
-      // Add user location marker with a distinct pin style
-      const userLocationPin = L.divIcon({
-        className: 'user-location-marker',
-        html: `
-          <div class="flex flex-col items-center">
-            <div class="map-pin-pulse w-6 h-6 rounded-full bg-blue-500/20 animate-ping"></div>
-            <div class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center">
-              <div class="h-4 w-4 rounded-full bg-blue-500 border-2 border-white shadow-md"></div>
-            </div>
-            <div class="mt-1 px-2 py-1 bg-background text-xs font-medium rounded-full shadow-md border border-border">You</div>
-          </div>
-        `,
-        iconSize: [32, 48],
-        iconAnchor: [16, 32],
-      });
-
-      const userMarker = L.marker([position.lat, position.lng] as L.LatLngTuple, {
-        icon: userLocationPin,
-        zIndexOffset: 1000 // Make sure user pin is above all other pins
-      }).addTo(mapInstance.current);
-
-      // Add to markers array for cleanup
-      markersRef.current.push(userMarker);
-    }
-
-    // Clear any existing property markers
-    markersRef.current = markersRef.current.filter(marker => {
-      if (marker.options.icon && marker.options.icon.options.className === 'custom-price-marker') {
-        marker.remove();
-        return false;
-      }
-      return true;
-    });
-
-    // Add property markers
-    properties.forEach((property) => {
-      // For demo purposes, generate random locations near user position or New York
-      const centerLat = position ? position.lat : 40.7128;
-      const centerLng = position ? position.lng : -74.006;
-      
-      const randomLat = centerLat + (Math.random() - 0.5) * 0.05;
-      const randomLng = centerLng + (Math.random() - 0.5) * 0.05;
-
-      // Create custom icon
-      const priceIcon = L.divIcon({
-        className: 'custom-price-marker',
-        html: `<div class="bg-${property.instant ? 'brand-red' : 'slate-800'} text-white px-2 py-1 rounded-full text-xs font-bold border-2 border-white shadow-md">$${property.price}</div>`,
-        iconSize: [40, 20],
-        iconAnchor: [20, 10],
-      });
-
-      // Create marker with custom icon
-      if (mapInstance.current) {
-        const marker = L.marker([randomLat, randomLng] as L.LatLngTuple, { icon: priceIcon })
-          .addTo(mapInstance.current)
-          .bindPopup(`
-            <div class="p-2">
-              <h3 class="font-medium text-sm">${property.name}</h3>
-              <p class="text-xs">$${property.price}/night</p>
-            </div>
-          `);
-
-        // Add click event listener
-        marker.on('click', () => {
-          handlePropertyClick(property.id);
-        });
-
-        markersRef.current.push(marker);
-      }
-    });
-
-    // Cleanup function
-    return () => {
-      console.info("Cleaning up map resources");
-      if (mapInstance.current) {
-        markersRef.current.forEach(marker => marker.remove());
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-    };
-  }, [properties, navigate, position]);
-
-  // Render location status UI
-  const renderLocationStatus = () => {
-    if (loading) {
-      return (
-        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
-          <div className="animate-spin h-4 w-4 border-2 border-brand-red border-t-transparent rounded-full"></div>
-          <span className="text-xs">Locating you...</span>
-        </div>
-      );
-    }
-    
-    if (error) {
-      return (
-        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
-          <div className="h-4 w-4 bg-red-500 rounded-full"></div>
-          <span className="text-xs">Location error</span>
-        </div>
-      );
-    }
-    
-    if (position) {
-      return (
-        <div className="absolute top-4 left-4 bg-background/80 p-2 rounded-full shadow-md z-20 flex items-center space-x-2">
-          <div className="h-4 w-4 bg-green-500 rounded-full"></div>
-          <span className="text-xs">Location found</span>
-        </div>
-      );
-    }
-    
-    return null;
-  };
-
-  // Fallback placeholder for when the map is loading or if there's an issue
-  const renderPlaceholder = () => (
-    <div className="text-center space-y-4 relative z-10 p-8 max-w-lg">
-      <h3 className="text-xl font-medium">OpenStreetMap Integration</h3>
-      <p className="text-muted-foreground text-sm">Loading map or displaying fallback if the map couldn't be loaded.</p>
-      
-      <motion.div 
-        className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-8"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
-      >
-        {properties.slice(0, 6).map((property, index) => (
-          <motion.div 
-            key={property.id}
-            className="bg-background border border-border rounded-lg p-3 cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => handlePropertyClick(property.id)}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 + 0.2 }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin size={16} className="text-brand-red" />
-              <span className="text-xs font-medium truncate">{property.name}</span>
-            </div>
-            <div className="text-xs text-muted-foreground">${property.price}/night</div>
-          </motion.div>
-        ))}
-      </motion.div>
-    </div>
-  );
-
   return (
     <div className="relative w-full h-full bg-muted/30 rounded-xl overflow-hidden flex flex-col items-center justify-center">
+      {/* Background pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzNzM3MzciIGZpbGwtb3BhY2l0eT0iMC4wNyI+PHBhdGggZD0iTTM2IDM0djI2aDI0VjM0SDM2ek0wIDM0djI2aDI0VjM0SDB6TTM2IDBoLTJ2MjRoMjZWMEgzNnptLTEwIDB2MjRoMjRWMEgyNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10" />
       
-      {renderLocationStatus()}
+      {/* Status indicator */}
+      <LocationStatus loading={loading} error={error} position={position} />
       
+      {/* Map container */}
       <div ref={mapRef} className="absolute inset-0 z-10"></div>
+      
+      {/* Fallback content */}
       <div className="fallback-content absolute inset-0 flex items-center justify-center z-0">
-        {renderPlaceholder()}
+        <MapPlaceholder properties={properties} onPropertyClick={handlePropertyClick} />
       </div>
 
-      <style>
-        {`
-        .leaflet-container {
-          width: 100%;
-          height: 100%;
-          z-index: 1;
-        }
-        .custom-price-marker {
-          background: transparent;
-          border: none;
-        }
-        .user-location-marker {
-          background: transparent;
-          border: none;
-        }
-        .map-pin-pulse {
-          animation: map-pin-pulse 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-        @keyframes map-pin-pulse {
-          0% {
-            transform: scale(0.8);
-            opacity: 0.6;
-          }
-          50% {
-            opacity: 0.2;
-          }
-          100% {
-            transform: scale(1.5);
-            opacity: 0;
-          }
-        }
-        `}
-      </style>
+      {/* Custom styles */}
+      <MapStyles />
     </div>
   );
 }
