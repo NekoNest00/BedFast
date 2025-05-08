@@ -39,8 +39,8 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
     if (!mapContainer.current || !mapToken) return;
 
     // Default to New York if user location isn't available
-    const defaultLocation = [-74.006, 40.7128];
-    const userLocation = location 
+    const defaultLocation: [number, number] = [-74.006, 40.7128];
+    const userLocation: [number, number] = location 
       ? [location.longitude, location.latitude]
       : defaultLocation;
 
@@ -66,7 +66,7 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
         color: "#3886F6",
         scale: 0.8
       })
-      .setLngLat(userLocation as [number, number])
+      .setLngLat(userLocation)
       .addTo(map.current);
     }
 
@@ -105,7 +105,7 @@ export default function PropertyMap({ properties, mapboxToken }: PropertyMapProp
 
       // Create and add marker
       const marker = new mapboxgl.Marker(el)
-        .setLngLat([randomLng, randomLat])
+        .setLngLat([randomLng, randomLat] as [number, number])
         .setPopup(popup)
         .addTo(map.current!);
       

@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { Button } from "./ui/button";
 import L from "leaflet";
+import { LatLngTuple } from "leaflet";
 
 // Include Leaflet styles directly in the component
 // instead of importing the CSS file
@@ -40,8 +41,8 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
     if (!mapRef.current) return;
 
     // Default to New York if user location isn't available
-    const defaultLocation = [40.7128, -74.006];
-    const userLocation = location 
+    const defaultLocation: LatLngTuple = [40.7128, -74.006];
+    const userLocation: LatLngTuple = location 
       ? [location.latitude, location.longitude]
       : defaultLocation;
 
