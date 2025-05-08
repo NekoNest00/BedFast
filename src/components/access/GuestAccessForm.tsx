@@ -189,9 +189,12 @@ export default function GuestAccessForm({
             </p>
           </div>
           
-          <PinDisplay 
-            generatedPin={generatedPin} 
-            accessEndTime={accessEndTime} 
+          <PinDisplay
+            pin={generatedPin}
+            accessStatus="active"
+            propertyName={propertyName}
+            startDate={new Date()}
+            endDate={accessEndTime}
           />
           
           <PinActions

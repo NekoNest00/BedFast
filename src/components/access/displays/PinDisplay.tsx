@@ -73,7 +73,7 @@ export default function PinDisplay({
         {/* Property name and status */}
         <div className="flex justify-between items-start mb-2">
           <h3 className="font-medium">{propertyName}</h3>
-          <StatusBadge status={accessStatus} />
+          <StatusBadge accessStatus={accessStatus} />
         </div>
 
         {/* Access window */}
@@ -88,7 +88,8 @@ export default function PinDisplay({
         >
           <PinCodeDisplay 
             pin={pin} 
-            isActive={accessStatus === "active"} 
+            shouldShow={accessStatus === "active"}
+            accessStatus={accessStatus}
           />
         </motion.div>
 
