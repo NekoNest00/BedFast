@@ -25,7 +25,7 @@ export default function StatusBadge({ accessStatus }: StatusBadgeProps) {
       return (
         <Badge 
           variant="outline" 
-          className="border-amber-500 text-amber-500 flex items-center gap-1 px-3 py-1 h-6 text-xs font-medium w-[110px] justify-center"
+          className="border-amber-500 text-amber-500 flex items-center gap-1 px-3 py-1 h-6 text-xs font-medium w-[120px] justify-center"
         >
           <Clock size={iconSize} className="flex-shrink-0" />
           <span>Not Yet Active</span>
