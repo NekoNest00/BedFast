@@ -1,9 +1,11 @@
 
 import React, { useEffect, useRef } from "react";
 import { Property } from "./PropertyCard";
-import { MapPin } from "lucide-react";
+import { MapPin, Navigation } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useGeolocation } from "../hooks/useGeolocation";
+import { Button } from "./ui/button";
 import L from "leaflet";
 
 // Include Leaflet styles directly in the component
@@ -17,6 +19,18 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  
+  // Use our geolocation hook
+  const { 
+    location, 
+    loading: locationLoading, 
+    permissionStatus,
+    requestGeolocation
+  } = useGeolocation({
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0
+  });
 
   const handlePropertyClick = (propertyId: string) => {
     navigate(`/property/${propertyId}`);
@@ -25,25 +39,50 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
   useEffect(() => {
     if (!mapRef.current) return;
 
+    // Default to New York if user location isn't available
+    const defaultLocation = [40.7128, -74.006];
+    const userLocation = location 
+      ? [location.latitude, location.longitude]
+      : defaultLocation;
+
     // Initialize map if it doesn't exist
     if (!mapInstance.current) {
-      mapInstance.current = L.map(mapRef.current).setView([40.7128, -74.006], 13);
+      mapInstance.current = L.map(mapRef.current).setView(userLocation, 13);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19,
       }).addTo(mapInstance.current);
+    } else {
+      // If map exists, just update the view
+      mapInstance.current.setView(userLocation, 13);
     }
 
     // Clear any existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
+    
+    // Add user location marker if available
+    if (location) {
+      const userIcon = L.divIcon({
+        className: 'custom-user-marker',
+        html: `<div class="bg-blue-500 rounded-full p-1 border-2 border-white shadow-md"></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+      
+      L.marker([location.latitude, location.longitude], { icon: userIcon })
+        .addTo(mapInstance.current!)
+        .bindPopup('Your location');
+    }
 
     // Add property markers
     properties.forEach((property) => {
-      // For demo purposes, generate random locations near New York City
-      const randomLat = 40.7128 + (Math.random() - 0.5) * 0.05;
-      const randomLng = -74.006 + (Math.random() - 0.5) * 0.05;
+      // Generate locations near user location or default
+      const centerLat = userLocation[0];
+      const centerLng = userLocation[1];
+      const randomLat = centerLat + (Math.random() - 0.5) * 0.05;
+      const randomLng = centerLng + (Math.random() - 0.5) * 0.05;
 
       // Create custom icon
       const priceIcon = L.divIcon({
@@ -78,7 +117,7 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
         mapInstance.current = null;
       }
     };
-  }, [properties, navigate]);
+  }, [properties, navigate, location]);
 
   // Fallback placeholder for when the map is loading or if there's an issue
   const renderPlaceholder = () => (
@@ -111,6 +150,18 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
           </motion.div>
         ))}
       </motion.div>
+      
+      {permissionStatus === "denied" && (
+        <div className="mt-4">
+          <p className="text-sm font-medium mb-2">Location access denied</p>
+          <Button 
+            size="sm" 
+            className="text-xs"
+            onClick={() => requestGeolocation()}>
+            <Navigation className="mr-2 h-3 w-3" /> Enable Location
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -124,6 +175,25 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
         {renderPlaceholder()}
       </div>
 
+      {/* Location permission UI overlay */}
+      {permissionStatus === "denied" && (
+        <div className="absolute top-4 left-4 z-20 bg-background/90 p-3 rounded-lg shadow-md max-w-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="text-brand-red" size={18} />
+            <h4 className="font-medium text-sm">Location access required</h4>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            Enable location services to see properties near you.
+          </p>
+          <Button 
+            size="sm" 
+            className="text-xs w-full"
+            onClick={() => requestGeolocation()}>
+            <Navigation className="mr-2 h-3 w-3" /> Request Access
+          </Button>
+        </div>
+      )}
+
       <style>
         {`
         .leaflet-container {
@@ -132,6 +202,10 @@ export default function OpenStreetMapView({ properties }: OpenStreetMapViewProps
           z-index: 1;
         }
         .custom-price-marker {
+          background: transparent;
+          border: none;
+        }
+        .custom-user-marker {
           background: transparent;
           border: none;
         }
