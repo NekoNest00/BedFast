@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { Copy, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import GuestAccessForm from "./GuestAccessForm";
+import GuestAccessForm from "./guest/GuestAccessForm";
 
 interface AccessActionsProps {
   booking: {
