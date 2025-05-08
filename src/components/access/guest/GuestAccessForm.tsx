@@ -8,6 +8,7 @@ import GuestNameForm from "./GuestNameForm";
 import AccessDurationSlider from "../forms/AccessDurationSlider";
 import GuestPinDisplay from "./GuestPinDisplay";
 import GuestAccessLog from "./GuestAccessLog";
+import GuestPinActions from "./GuestPinActions";
 
 interface GuestAccessFormProps {
   propertyName: string;
@@ -262,7 +263,7 @@ interface ResultsSectionProps {
   accessEndTime: Date;
   accessLog: {time: Date, action: string}[];
   contactMethod: "email" | "sms";
-  copyGuestPinToClipboard: () => void;
+  copyPinToClipboard: () => void;
   shareWithGuest: () => void;
   revokeAccess: () => void;
 }
@@ -274,7 +275,7 @@ function ResultsSection({
   accessEndTime,
   accessLog,
   contactMethod,
-  copyGuestPinToClipboard,
+  copyPinToClipboard,
   shareWithGuest,
   revokeAccess
 }: ResultsSectionProps) {
@@ -295,7 +296,7 @@ function ResultsSection({
       />
       
       <GuestPinActions
-        copyPinToClipboard={copyGuestPinToClipboard}
+        copyPinToClipboard={copyPinToClipboard}
         shareWithGuest={shareWithGuest}
         revokeAccess={revokeAccess}
         contactMethod={contactMethod}

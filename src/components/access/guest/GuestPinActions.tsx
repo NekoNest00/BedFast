@@ -34,7 +34,7 @@ export default function GuestPinActions({
       </Button>
       
       <Button 
-        className="w-full bg-brand-red hover:bg-brand-red/90 text-white"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
         onClick={shareWithGuest}
       >
         {contactMethod === "email" ? (
