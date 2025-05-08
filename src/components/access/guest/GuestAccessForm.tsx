@@ -80,7 +80,7 @@ export default function GuestAccessForm({
     }, 1000);
   };
   
-  const copyGuestPinToClipboard = () => {
+  const copyPinToClipboard = () => {
     navigator.clipboard.writeText(generatedPin).then(() => {
       toast({
         title: "PIN Copied",
@@ -171,7 +171,7 @@ export default function GuestAccessForm({
           accessEndTime={accessEndTime}
           accessLog={accessLog}
           contactMethod={contactMethod}
-          copyGuestPinToClipboard={copyGuestPinToClipboard}
+          copyPinToClipboard={copyPinToClipboard}
           shareWithGuest={shareWithGuest}
           revokeAccess={revokeAccess}
         />
@@ -306,3 +306,4 @@ function ResultsSection({
     </div>
   );
 }
+
